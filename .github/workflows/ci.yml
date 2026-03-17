@@ -36,43 +36,43 @@ jobs:
         run: npx nx run-many --target=test --all --ci --passWithNoTests
 
   # ─────────────────────────────────────────────
-  # JOB 2: Build Docker Image
-  # Runs after unit tests pass. Builds the image but does NOT push yet —
-  # it gets exported as a tarball so the e2e job can load and test it.
+  # JOB 2: Build Docker Image → tarball
+  # Built once, saved as a pipeline artifact.
+  # Never touches Docker Hub — nothing is published yet.
   # ─────────────────────────────────────────────
   build:
     name: Build Docker Image
     runs-on: ubuntu-latest
     needs: [unit-tests]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build image and export as tarball
         uses: docker/build-push-action@v7
         with:
           context: .
           push: false
-          # Save the image to a local tar file instead of pushing to Docker Hub
-          outputs: type=docker,dest=/tmp/angular-monorepo-template.tar
-          tags: ${{ env.IMAGE_NAME }}:test
+          outputs: type=docker,dest=/tmp/angular-app.tar
+          tags: ${{ env.IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Upload image tarball as artifact
+      - name: Upload tarball as pipeline artifact
         uses: actions/upload-artifact@v4
         with:
           name: docker-image
-          path: /tmp/angular-monorepo-template.tar
-          retention-days: 1  # only needed for the duration of this pipeline run
+          path: /tmp/angular-app.tar
+          retention-days: 1
 
   # ─────────────────────────────────────────────
   # JOB 3: E2E Tests
-  # Loads the exact Docker image that was built in job 2,
-  # runs it as a container, and points Cypress at it.
+  # Downloads the exact tarball from job 2, loads it,
+  # runs it as a container, Cypress tests against it.
   # ─────────────────────────────────────────────
   e2e-tests:
     name: Cypress E2E Tests
@@ -100,17 +100,22 @@ jobs:
           path: /tmp
 
       - name: Load Docker image from tarball
-        run: docker load --input /tmp/angular-monorepo-template.tar
+        run: docker load --input /tmp/angular-app.tar
 
       - name: Start container
         run: |
           docker run -d \
             --name angular-monorepo-template-test \
             -p 4200:4000 \
-            ${{ env.IMAGE_NAME }}:test
+            ${{ env.IMAGE_NAME }}:latest
 
       - name: Wait for SSR server to be ready
-        run: npx wait-on http://localhost:4200 --timeout 60000
+        run: |
+          for i in {1..30}; do
+            curl -s http://localhost:4200 && break
+            echo "Waiting... ($i/30)"
+            sleep 2
+          done
 
       - name: Run Cypress E2E tests
         run: npx nx e2e e2e --configuration=ci
@@ -135,9 +140,8 @@ jobs:
 
   # ─────────────────────────────────────────────
   # JOB 4: Push Docker Image
-  # Only runs on real pushes to main after e2e passes.
-  # Rebuilds using the cache so it's near-instant,
-  # then pushes :latest and :sha-<commit> to Docker Hub.
+  # Downloads the same tarball that was tested in job 3,
+  # loads it and pushes it — no rebuild whatsoever.
   # ─────────────────────────────────────────────
   push:
     name: Push Docker Image
@@ -145,33 +149,30 @@ jobs:
     needs: [e2e-tests]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
       - name: Log in to Docker Hub
         uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push to Docker Hub
-        uses: docker/build-push-action@v7
+      - name: Download image tarball
+        uses: actions/download-artifact@v4
         with:
-          context: .
-          push: true
-          tags: |
-            ${{ env.IMAGE_NAME }}:latest
-            ${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
-          # GHA cache means layers are already warm — this rebuild is fast
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          name: docker-image
+          path: /tmp
+
+      - name: Load image from tarball
+        run: docker load --input /tmp/angular-app.tar
+
+      - name: Tag and push to Docker Hub
+        run: |
+          docker tag ${{ env.IMAGE_NAME }}:latest ${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+          docker push ${{ env.IMAGE_NAME }}:latest
+          docker push ${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
 
   # ─────────────────────────────────────────────
   # JOB 5: Deploy to EC2
-  # SSHs in, pulls the new image, replaces the running container.
+  # SSHs in, pulls :latest, replaces the running container.
   # ─────────────────────────────────────────────
   deploy:
     name: Deploy to EC2

@@ -513,7 +513,7 @@ import { CommonModule } from '@angular/common';
         <div id="welcome">
           <h1>
             <span> Hello there, </span>
-            Welcome angular-monorepo-template 👋💃🏻🪩
+            Welcome angular-monorepo-template 👋💃🏻🪩🎶
           </h1>
         </div>
         <!--  HERO  -->
