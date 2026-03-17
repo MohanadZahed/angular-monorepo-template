@@ -106,7 +106,7 @@ jobs:
         run: |
           docker run -d \
             --name angular-monorepo-template-test \
-            -p 4200:80 \
+            -p 4200:4000 \
             ${{ env.IMAGE_NAME }}:test
 
       - name: Wait for SSR server to be ready
