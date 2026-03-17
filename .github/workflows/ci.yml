@@ -194,7 +194,7 @@ jobs:
             docker run -d \
               --name angular-monorepo-template \
               --restart unless-stopped \
-              -p 80:80 \
+              -p 80:4000 \
               mzahed23/angular-monorepo-template:latest
 
             docker image prune -f
