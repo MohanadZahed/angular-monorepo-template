@@ -5,7 +5,8 @@
   "scripts": {
     "start": "nx serve",
     "build": "nx build",
-    "test": "nx test"
+    "test": "nx test",
+    "docker:push": "docker buildx build --platform linux/amd64,linux/arm64 -t mzahed23/angular-monorepo-template:latest --push ."
   },
   "private": true,
   "dependencies": {
@@ -61,7 +62,8 @@
     "ts-node": "10.9.1",
     "tslib": "^2.3.0",
     "typescript": "~5.9.2",
-    "typescript-eslint": "^8.40.0"
+    "typescript-eslint": "^8.40.0",
+    "wait-on": "^9.0.4"
   },
   "nx": {
     "includedScripts": []

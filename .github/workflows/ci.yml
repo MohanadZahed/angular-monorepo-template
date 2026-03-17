@@ -1,43 +1,200 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
+    branches: [main]
 
-permissions:
-  actions: read
-  contents: read
+env:
+  IMAGE_NAME: mzahed23/angular-monorepo-template
 
 jobs:
-  main:
+  # ─────────────────────────────────────────────
+  # JOB 1: Unit Tests
+  # Fast feedback — fail before wasting time on a Docker build
+  # ─────────────────────────────────────────────
+  unit-tests:
+    name: Unit Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
-          filter: tree:0
           fetch-depth: 0
 
-      # This enables task distribution via Nx Cloud
-      # Run this command as early as possible, before dependencies are installed
-      # Learn more at https://nx.dev/ci/reference/nx-cloud-cli#npx-nxcloud-startcirun
-      # Uncomment this line to enable task distribution
-      # - run: npx nx start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="e2e-ci"
-
-      # Cache node_modules
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
+          node-version: 24
+          cache: npm
 
-      - run: npm ci
-      - run: npx cypress install
+      - name: Install dependencies
+        run: npm ci
 
-      # Prepend any command with "nx record --" to record its logs to Nx Cloud
-      # - run: npx nx record -- echo Hello World
-      # When you enable task distribution, run the e2e-ci task instead of e2e
-      - run: npx nx run-many -t lint test build e2e
-      # Nx Cloud recommends fixes for failures to help you get CI green faster. Learn more: https://nx.dev/ci/features/self-healing-ci
-      - run: npx nx fix-ci
+      - name: Run unit tests
+        run: npx nx run-many --target=test --all --ci --passWithNoTests
+
+  # ─────────────────────────────────────────────
+  # JOB 2: Build Docker Image
+  # Runs after unit tests pass. Builds the image but does NOT push yet —
+  # it gets exported as a tarball so the e2e job can load and test it.
+  # ─────────────────────────────────────────────
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: [unit-tests]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image and export as tarball
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          # Save the image to a local tar file instead of pushing to Docker Hub
+          outputs: type=docker,dest=/tmp/angular-monorepo-template.tar
+          tags: ${{ env.IMAGE_NAME }}:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Upload image tarball as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: /tmp/angular-monorepo-template.tar
+          retention-days: 1  # only needed for the duration of this pipeline run
+
+  # ─────────────────────────────────────────────
+  # JOB 3: E2E Tests
+  # Loads the exact Docker image that was built in job 2,
+  # runs it as a container, and points Cypress at it.
+  # ─────────────────────────────────────────────
+  e2e-tests:
+    name: Cypress E2E Tests
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download image tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+          path: /tmp
+
+      - name: Load Docker image from tarball
+        run: docker load --input /tmp/angular-monorepo-template.tar
+
+      - name: Start container
+        run: |
+          docker run -d \
+            --name angular-monorepo-template-test \
+            -p 4200:80 \
+            ${{ env.IMAGE_NAME }}:test
+
+      - name: Wait for SSR server to be ready
+        run: npx wait-on http://localhost:4200 --timeout 60000
+
+      - name: Run Cypress E2E tests
+        run: npx nx e2e e2e --configuration=ci
+
+      - name: Print container logs on failure
+        if: failure()
+        run: docker logs angular-monorepo-template-test
+
+      - name: Upload Cypress screenshots on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+
+      - name: Stop and remove test container
         if: always()
+        run: |
+          docker stop angular-monorepo-template-test || true
+          docker rm   angular-monorepo-template-test || true
+
+  # ─────────────────────────────────────────────
+  # JOB 4: Push Docker Image
+  # Only runs on real pushes to main after e2e passes.
+  # Rebuilds using the cache so it's near-instant,
+  # then pushes :latest and :sha-<commit> to Docker Hub.
+  # ─────────────────────────────────────────────
+  push:
+    name: Push Docker Image
+    runs-on: ubuntu-latest
+    needs: [e2e-tests]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push to Docker Hub
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+          # GHA cache means layers are already warm — this rebuild is fast
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ─────────────────────────────────────────────
+  # JOB 5: Deploy to EC2
+  # SSHs in, pulls the new image, replaces the running container.
+  # ─────────────────────────────────────────────
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    needs: [push]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: SSH into EC2 and redeploy
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            docker pull mzahed23/angular-monorepo-template:latest
+
+            docker stop angular-monorepo-template || true
+            docker rm   angular-monorepo-template || true
+
+            docker run -d \
+              --name angular-monorepo-template \
+              --restart unless-stopped \
+              -p 80:80 \
+              mzahed23/angular-monorepo-template:latest
+
+            docker image prune -f
