@@ -1,5 +1,6 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component, inject, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FeatureFlagService } from './feature-flag.service';
 
 @Component({
   selector: 'app-nx-welcome',
@@ -510,6 +511,11 @@ import { CommonModule } from '@angular/common';
     <div class="wrapper">
       <div class="container">
         <!--  WELCOME  -->
+        <ul>
+          <li>Statistics: {{ showStatistics }}</li>
+          <li>Invoices: {{ showInvoices }}</li>
+          <li>Orders: {{ showOrders }}</li>
+        </ul>
         <div id="welcome">
           <h1>
             <span> Hello there, </span>
@@ -947,4 +953,10 @@ nx g &#64;nx/angular:component ui/src/lib/button</pre>
   styles: [],
   encapsulation: ViewEncapsulation.None,
 })
-export class NxWelcome {}
+export class NxWelcome {
+  private featureFlagService = inject(FeatureFlagService);
+
+  showStatistics = this.featureFlagService.isEnabled('statistics');
+  showInvoices = this.featureFlagService.isEnabled('invoices');
+  showOrders = this.featureFlagService.isEnabled('orders');
+}

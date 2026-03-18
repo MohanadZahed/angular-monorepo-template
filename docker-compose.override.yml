@@ -1,0 +1,8 @@
+services:
+  angular-monorepo-template:
+    build:
+      args:
+        BUILD_ENV: development
+  json-server:
+    volumes:
+      - ./json-server/config.json:/app/config.json

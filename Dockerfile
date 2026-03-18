@@ -11,7 +11,8 @@ RUN npm ci
 
 COPY . .
 
-RUN npx nx build angular-monorepo-template --configuration=production
+ARG BUILD_ENV=production
+RUN npx nx build angular-monorepo-template --configuration=${BUILD_ENV}
 
 # Runtime stage
 FROM node:24.14.0-alpine

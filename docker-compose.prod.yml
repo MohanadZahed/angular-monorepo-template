@@ -1,0 +1,4 @@
+services:
+  json-server:
+    volumes:
+      - /home/ec2-user/config.json:/app/config.json

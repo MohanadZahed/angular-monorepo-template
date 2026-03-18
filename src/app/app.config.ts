@@ -1,5 +1,7 @@
 import {
   ApplicationConfig,
+  inject,
+  provideAppInitializer,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
@@ -8,11 +10,18 @@ import {
   provideClientHydration,
   withEventReplay,
 } from '@angular/platform-browser';
+import { FeatureFlagService } from './feature-flag.service';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideClientHydration(withEventReplay()),
     provideBrowserGlobalErrorListeners(),
     provideRouter(appRoutes),
+    provideHttpClient(withFetch()),
+    provideAppInitializer(() => {
+      const featureFlagService = inject(FeatureFlagService);
+      return featureFlagService.loadFlags();
+    })
   ],
 };

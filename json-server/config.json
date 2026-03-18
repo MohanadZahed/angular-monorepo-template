@@ -1,0 +1,7 @@
+{
+  "featureFlags": {
+    "statistics": true,
+    "invoices": false,
+    "orders": true
+  }
+}
