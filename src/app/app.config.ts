@@ -10,7 +10,7 @@ import {
   provideClientHydration,
   withEventReplay,
 } from '@angular/platform-browser';
-import { FeatureFlagService } from '../../libs/core/src/lib/core/services/feature-flag.service';
+import { FeatureFlagService } from '@angular-monorepo-template/core';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { backendConfigProvider } from './config/backend.config';
 
