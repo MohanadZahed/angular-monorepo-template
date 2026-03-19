@@ -1,6 +1,6 @@
 import { Component, inject, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FeatureFlagService } from './feature-flag.service';
+import { FeatureFlagService } from '../../libs/core/src/lib/core/services/feature-flag.service';
 
 @Component({
   selector: 'app-nx-welcome',

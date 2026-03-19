@@ -1,0 +1,17 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "moduleResolution": "bundler",
+    "emitDecoratorMetadata": false,
+    "target": "es2022",
+    "module": "preserve",
+    "lib": ["es2020", "dom"],
+    "baseUrl": ".",
+    "paths": {
+      "@org/env": ["src/environments/environment.ts"],
+      "@angular-monorepo-template/core": ["libs/core/src/index.ts"],
+      "@angular-monorepo-template/statistics": ["libs/statistics/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

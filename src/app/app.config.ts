@@ -10,8 +10,9 @@ import {
   provideClientHydration,
   withEventReplay,
 } from '@angular/platform-browser';
-import { FeatureFlagService } from './feature-flag.service';
+import { FeatureFlagService } from '../../libs/core/src/lib/core/services/feature-flag.service';
 import { provideHttpClient, withFetch } from '@angular/common/http';
+import { backendConfigProvider } from './config/backend.config';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -22,6 +23,7 @@ export const appConfig: ApplicationConfig = {
     provideAppInitializer(() => {
       const featureFlagService = inject(FeatureFlagService);
       return featureFlagService.loadFlags();
-    })
+    }),
+    backendConfigProvider,
   ],
 };

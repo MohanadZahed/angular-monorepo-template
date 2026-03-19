@@ -1,7 +1,7 @@
-/* import { Injectable, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap, catchError, of } from 'rxjs';
-import { environment } from '../environments/environment';
+import { BACKEND_CONFIG } from '../config';
 
 export interface FeatureFlags {
   statistics: boolean;
@@ -18,11 +18,13 @@ const DEFAULT_FLAGS: FeatureFlags = {
 @Injectable({ providedIn: 'root' })
 export class FeatureFlagService {
   private http = inject(HttpClient);
+  private config = inject(BACKEND_CONFIG);
   private flags: FeatureFlags = DEFAULT_FLAGS;
 
+
   loadFlags() {
-    console.log('Loading feature flags from################', environment);
-    return this.http.get<FeatureFlags>(environment.featureFlagsUrl).pipe(
+    console.log('Loading feature flags from################', this.config.rest.featureFlagsUrl);
+    return this.http.get<FeatureFlags>(this.config.rest.featureFlagsUrl).pipe(
       tap(response => {
         console.log('Feature flags loaded:', response);
         this.flags = response;
@@ -38,4 +40,4 @@ export class FeatureFlagService {
   isEnabled(flag: keyof FeatureFlags): boolean {
     return this.flags[flag];
   }
-} */
+}
