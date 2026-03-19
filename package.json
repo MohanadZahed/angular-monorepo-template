@@ -7,7 +7,7 @@
     "build": "nx build",
     "test": "nx test",
     "docker:push": "docker buildx build --platform linux/amd64,linux/arm64 -t mzahed23/angular-monorepo-template:latest --push .",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "private": true,
   "dependencies": {
