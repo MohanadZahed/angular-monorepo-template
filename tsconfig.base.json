@@ -8,9 +8,10 @@
     "lib": ["es2020", "dom"],
     "baseUrl": ".",
     "paths": {
-      "@org/env": ["src/environments/environment.ts"],
       "@angular-monorepo-template/core": ["libs/core/src/index.ts"],
-      "@angular-monorepo-template/statistics": ["libs/statistics/src/index.ts"]
+      "@angular-monorepo-template/statistics": ["libs/statistics/src/index.ts"],
+      "@angular-monorepo-template/invoices": ["libs/invoices/src/index.ts"],
+      "@angular-monorepo-template/orders": ["libs/orders/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

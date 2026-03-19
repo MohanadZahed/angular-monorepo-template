@@ -1,5 +1,5 @@
 import { ValueProvider } from '@angular/core';
-import { BACKEND_CONFIG } from '../../../libs/core/src/lib/core/services/feature-flag.service';
+import { BACKEND_CONFIG, BackendConfig } from '@angular-monorepo-template/core';
 import { environment } from '../../environments/environment';
 
 export const backendConfig: BackendConfig = {

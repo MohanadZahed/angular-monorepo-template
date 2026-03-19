@@ -1,36 +1,34 @@
-import { Route } from '@angular/router';
+import { Routes } from '@angular/router';
+import { featureFlagGuard, NotFound } from '@angular-monorepo-template/core';
 
-export const appRoutes: Route[] = [];
-
-/* import { Routes } from '@angular/router';
-import { featureFlagGuard } from '@angular-monorepo-template/core';
-
-export const routes: Routes = [
+export const appRoutes: Routes = [
+  { path: '', pathMatch: 'full', children: [] },
   {
     path: 'statistics',
     canMatch: [featureFlagGuard('statistics')],
     loadComponent: () =>
-      import('@angular-monorepo-template/statistics').then((m) => m.StatisticsComponent),
+      import('@angular-monorepo-template/statistics').then(
+        (m) => m.StatisticsComponent,
+      ),
   },
   {
     path: 'invoices',
     canMatch: [featureFlagGuard('invoices')],
     loadComponent: () =>
-      import('@angular-monorepo-template/invoices').then((m) => m.InvoicesComponent),
+      import('@angular-monorepo-template/invoices').then((m) => m.Invoices),
   },
   {
     path: 'orders',
     canMatch: [featureFlagGuard('orders')],
     loadComponent: () =>
-      import('@angular-monorepo-template/orders').then((m) => m.OrdersComponent),
+      import('@angular-monorepo-template/orders').then((m) => m.Orders),
   },
   {
     path: 'not-found',
-    loadComponent: () =>
-      import('@angular-monorepo-template/shared-ui').then((m) => m.NotFoundComponent),
+    component: NotFound,
   },
   {
     path: '**',
     redirectTo: 'not-found',
   },
-]; */
+];

@@ -1,10 +1,11 @@
 import { Component, inject, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FeatureFlagService } from '../../libs/core/src/lib/core/services/feature-flag.service';
+import { FeatureFlagService } from '@angular-monorepo-template/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-nx-welcome',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink, RouterLinkActive],
   template: `
     <!--
      * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -522,6 +523,21 @@ import { FeatureFlagService } from '../../libs/core/src/lib/core/services/featur
             Welcome angular-monorepo-template 👋💃🏻🪩🎶
           </h1>
         </div>
+        <nav>
+          <ul>
+            <li>
+              <a routerLink="/statistics" routerLinkActive="active"
+                >Statistics</a
+              >
+            </li>
+            <li>
+              <a routerLink="/invoices" routerLinkActive="active">Invoices</a>
+            </li>
+            <li>
+              <a routerLink="/orders" routerLinkActive="active">Orders</a>
+            </li>
+          </ul>
+        </nav>
         <!--  HERO  -->
         <div id="hero" class="rounded">
           <div class="text-container">

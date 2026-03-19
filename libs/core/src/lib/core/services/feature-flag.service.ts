@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap, catchError, of } from 'rxjs';
-import { BACKEND_CONFIG } from '../config';
+import { BACKEND_CONFIG } from '../config/backend/backend-config.token';
 
 export interface FeatureFlags {
   statistics: boolean;
