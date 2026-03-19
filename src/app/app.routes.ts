@@ -7,9 +7,7 @@ export const appRoutes: Routes = [
     path: 'statistics',
     canMatch: [featureFlagGuard('statistics')],
     loadComponent: () =>
-      import('@angular-monorepo-template/statistics').then(
-        (m) => m.StatisticsComponent,
-      ),
+      import('@angular-monorepo-template/statistics').then((m) => m.Statistics),
   },
   {
     path: 'invoices',
