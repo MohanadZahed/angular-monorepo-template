@@ -6,7 +6,8 @@
     "start": "nx serve",
     "build": "nx build",
     "test": "nx test",
-    "docker:push": "docker buildx build --platform linux/amd64,linux/arm64 -t mzahed23/angular-monorepo-template:latest --push ."
+    "docker:push": "docker buildx build --platform linux/amd64,linux/arm64 -t mzahed23/angular-monorepo-template:latest --push .",
+    "prepare": "husky"
   },
   "private": true,
   "dependencies": {
@@ -52,10 +53,12 @@
     "eslint": "^9.8.0",
     "eslint-config-prettier": "^10.0.0",
     "eslint-plugin-cypress": "^3.5.0",
+    "husky": "^9.1.7",
     "jest": "^30.0.2",
     "jest-environment-jsdom": "^30.0.2",
     "jest-preset-angular": "~16.0.0",
     "jest-util": "^30.0.2",
+    "lint-staged": "^16.4.0",
     "nx": "22.5.4",
     "prettier": "~3.6.2",
     "ts-jest": "^29.4.0",
