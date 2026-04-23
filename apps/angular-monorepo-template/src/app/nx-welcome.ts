@@ -4,7 +4,7 @@ import { FeatureFlagService } from '@angular-monorepo-template/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
-  selector: 'app-nx-welcome',
+  selector: 'ng-mf-nx-welcome',
   imports: [CommonModule, RouterLink, RouterLinkActive],
   template: `
     <!--

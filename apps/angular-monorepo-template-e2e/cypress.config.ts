@@ -8,7 +8,7 @@ export default defineConfig({
         default: 'npx nx run angular-monorepo-template:serve',
         production: 'npx nx run angular-monorepo-template:serve-static',
       },
-      ciWebServerCommand: '',
+      ciWebServerCommand: 'npx nx run angular-monorepo-template:serve-static',
       ciBaseUrl: 'http://localhost:4200',
     }),
     baseUrl: 'http://localhost:4200',
