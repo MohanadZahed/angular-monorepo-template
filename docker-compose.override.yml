@@ -3,6 +3,7 @@ services:
     build:
       args:
         BUILD_ENV: development
+        LOGIN_REMOTE_URL: http://localhost:4201
   json-server:
     volumes:
       - ./json-server/config.json:/app/config.json

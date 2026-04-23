@@ -8,6 +8,15 @@ services:
       - '80:4000'
     depends_on:
       - json-server
+      - login
+
+  login:
+    container_name: login
+    build:
+      context: .
+      dockerfile: apps/login/Dockerfile
+    ports:
+      - '4201:80'
 
   json-server:
     container_name: json-server

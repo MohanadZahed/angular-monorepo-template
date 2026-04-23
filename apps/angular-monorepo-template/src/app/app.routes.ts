@@ -4,6 +4,10 @@ import { featureFlagGuard, NotFound } from '@angular-monorepo-template/core';
 export const appRoutes: Routes = [
   { path: '', pathMatch: 'full', children: [] },
   {
+    path: 'login',
+    loadChildren: () => import('login/Routes').then((m) => m?.remoteRoutes),
+  },
+  {
     path: 'statistics',
     canMatch: [featureFlagGuard('statistics')],
     loadComponent: () =>

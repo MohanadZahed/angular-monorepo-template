@@ -12,6 +12,8 @@ RUN npm ci
 COPY . .
 
 ARG BUILD_ENV=production
+ARG LOGIN_REMOTE_URL=http://localhost:4201
+ENV LOGIN_REMOTE_URL=${LOGIN_REMOTE_URL}
 RUN npx nx build angular-monorepo-template --configuration=${BUILD_ENV} && \
     npx nx run angular-monorepo-template:server --configuration=${BUILD_ENV}
 

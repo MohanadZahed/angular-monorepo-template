@@ -26,6 +26,13 @@ export default [
     },
   },
   {
+    files: ['**/*.html'],
+    // Override or add rules here
+    rules: {
+      '@angular-eslint/template/prefer-control-flow': ['off'],
+    },
+  },
+  {
     files: [
       '**/*.ts',
       '**/*.tsx',
