@@ -15,9 +15,11 @@
       "!{projectRoot}/**/*.cy.[jt]s?(x)",
       "!{projectRoot}/cypress.config.[jt]s"
     ],
-    "sharedGlobals": ["{workspaceRoot}/.github/workflows/ci.yml"]
+    "sharedGlobals": [
+      "{workspaceRoot}/.github/workflows/ci-host.yml",
+      "{workspaceRoot}/.github/workflows/ci-login.yml"
+    ]
   },
-  "nxCloudId": "69b86ce17d27a60d3119c8b4",
   "targetDefaults": {
     "@angular/build:application": {
       "cache": true,
