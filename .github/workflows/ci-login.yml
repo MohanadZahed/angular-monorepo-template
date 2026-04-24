@@ -1,13 +1,25 @@
-name: CI/CD Pipeline
+name: CI/CD Pipeline — Login Remote
 
 on:
   push:
     branches: [main]
+    paths:
+      - 'apps/login/**'
+      - 'apps/login-e2e/**'
+      - 'libs/**'
+      - 'package.json'
+      - 'package-lock.json'
   pull_request:
     branches: [main]
+    paths:
+      - 'apps/login/**'
+      - 'apps/login-e2e/**'
+      - 'libs/**'
+      - 'package.json'
+      - 'package-lock.json'
 
 env:
-  IMAGE_NAME: mzahed23/angular-monorepo-template
+  IMAGE_NAME: mzahed23/login-mf
 
 jobs:
   # ─────────────────────────────────────────────
@@ -56,8 +68,9 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: .
+          file: apps/login/Dockerfile
           push: false
-          outputs: type=docker,dest=/tmp/angular-app.tar
+          outputs: type=docker,dest=/tmp/login-app.tar
           tags: ${{ env.IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -65,8 +78,8 @@ jobs:
       - name: Upload tarball as pipeline artifact
         uses: actions/upload-artifact@v4
         with:
-          name: docker-image
-          path: /tmp/angular-app.tar
+          name: docker-image-login
+          path: /tmp/login-app.tar
           retention-days: 1
 
   # ─────────────────────────────────────────────
@@ -96,47 +109,47 @@ jobs:
       - name: Download image tarball
         uses: actions/download-artifact@v4
         with:
-          name: docker-image
+          name: docker-image-login
           path: /tmp
 
       - name: Load Docker image from tarball
-        run: docker load --input /tmp/angular-app.tar
+        run: docker load --input /tmp/login-app.tar
 
       - name: Start container
         run: |
           docker run -d \
-            --name angular-monorepo-template-test \
-            -p 4200:4000 \
+            --name login-test \
+            -p 4201:80 \
             ${{ env.IMAGE_NAME }}:latest
 
-      - name: Wait for SSR server to be ready
+      - name: Wait for server to be ready
         run: |
           for i in {1..30}; do
-            curl -s http://localhost:4200 && break
+            curl -s http://localhost:4201 && break
             echo "Waiting... ($i/30)"
             sleep 2
           done
 
       - name: Run Cypress E2E tests
-        run: npx nx e2e e2e --configuration=ci
+        run: npx nx e2e login-e2e --configuration=ci
 
       - name: Print container logs on failure
         if: failure()
-        run: docker logs angular-monorepo-template-test
+        run: docker logs login-test
 
       - name: Upload Cypress screenshots on failure
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: cypress-screenshots
+          name: cypress-screenshots-login
           path: cypress/screenshots
           if-no-files-found: ignore
 
       - name: Stop and remove test container
         if: always()
         run: |
-          docker stop angular-monorepo-template-test || true
-          docker rm   angular-monorepo-template-test || true
+          docker stop login-test || true
+          docker rm   login-test || true
 
   # ─────────────────────────────────────────────
   # JOB 4: Push Docker Image
@@ -158,11 +171,11 @@ jobs:
       - name: Download image tarball
         uses: actions/download-artifact@v4
         with:
-          name: docker-image
+          name: docker-image-login
           path: /tmp
 
       - name: Load image from tarball
-        run: docker load --input /tmp/angular-app.tar
+        run: docker load --input /tmp/login-app.tar
 
       - name: Tag and push to Docker Hub
         run: |
@@ -187,15 +200,15 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker pull mzahed23/angular-monorepo-template:latest
+            docker pull mzahed23/login-mf:latest
 
-            docker stop angular-monorepo-template || true
-            docker rm   angular-monorepo-template || true
+            docker stop login || true
+            docker rm   login || true
 
             docker run -d \
-              --name angular-monorepo-template \
+              --name login \
               --restart unless-stopped \
-              -p 80:4000 \
-              mzahed23/angular-monorepo-template:latest
+              -p 8082:80 \
+              mzahed23/login-mf:latest
 
             docker image prune -f
