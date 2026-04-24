@@ -9,6 +9,7 @@ on:
       - 'libs/**'
       - 'package.json'
       - 'package-lock.json'
+      - '.github/workflows/ci-login.yml'
   pull_request:
     branches: [main]
     paths:
@@ -17,6 +18,7 @@ on:
       - 'libs/**'
       - 'package.json'
       - 'package-lock.json'
+      - '.github/workflows/ci-login.yml'
 
 env:
   IMAGE_NAME: mzahed23/login-mf

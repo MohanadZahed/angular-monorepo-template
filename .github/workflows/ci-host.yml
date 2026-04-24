@@ -9,6 +9,7 @@ on:
       - 'libs/**'
       - 'package.json'
       - 'package-lock.json'
+      - '.github/workflows/ci-host.yml'
   pull_request:
     branches: [main]
     paths:
@@ -17,6 +18,7 @@ on:
       - 'libs/**'
       - 'package.json'
       - 'package-lock.json'
+      - '.github/workflows/ci-host.yml'
 
 env:
   IMAGE_NAME: mzahed23/angular-monorepo-template
@@ -72,6 +74,8 @@ jobs:
           push: false
           outputs: type=docker,dest=/tmp/angular-app.tar
           tags: ${{ env.IMAGE_NAME }}:latest
+          build-args: |
+            LOGIN_REMOTE_URL=http://${{ secrets.EC2_HOST }}:8082
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
