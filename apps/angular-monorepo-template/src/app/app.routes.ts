@@ -3,6 +3,7 @@ import {
   featureFlagGuard,
   isAuthenticated,
   redirectIfAuthenticated,
+  unsavedChangesGuard,
   NotFound,
 } from '@angular-monorepo-template/core';
 import { NxWelcome } from './nx-welcome';
@@ -37,6 +38,7 @@ export const appRoutes: Routes = [
     path: 'orders',
     canMatch: [featureFlagGuard('orders')],
     canActivate: [isAuthenticated],
+    canDeactivate: [unsavedChangesGuard],
     loadComponent: () =>
       import('@angular-monorepo-template/orders').then((m) => m.Orders),
   },

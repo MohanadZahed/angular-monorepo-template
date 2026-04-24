@@ -1,7 +1,15 @@
+@if (!showForm() && !submitted()) {
 <div class="page">
   <div class="page-header">
-    <h1 class="page-title">Orders</h1>
-    <p class="page-subtitle">Manage and track customer orders</p>
+    <div class="page-header-row">
+      <div>
+        <h1 class="page-title">Orders</h1>
+        <p class="page-subtitle">Manage and track customer orders</p>
+      </div>
+      <ui-button variant="primary" type="button" (click)="startNewOrder()">
+        + New Order
+      </ui-button>
+    </div>
   </div>
 
   <div class="card">
@@ -17,47 +25,246 @@
         </tr>
       </thead>
       <tbody>
+        @for (order of orders(); track order.id) {
         <tr>
-          <td>#ORD-0041</td>
-          <td>Alice Johnson</td>
-          <td>3</td>
-          <td>$149.00</td>
-          <td><span class="badge badge--success">Delivered</span></td>
-          <td>Apr 21, 2026</td>
+          <td>{{ order.id }}</td>
+          <td>{{ order.customer }}</td>
+          <td>{{ order.items }}</td>
+          <td>{{ order.amount }}</td>
+          <td>
+            <span class="badge" [class]="order.badgeClass"
+              >{{ order.status }}</span
+            >
+          </td>
+          <td>{{ order.date }}</td>
         </tr>
-        <tr>
-          <td>#ORD-0040</td>
-          <td>Bob Martinez</td>
-          <td>1</td>
-          <td>$59.99</td>
-          <td><span class="badge badge--info">Shipped</span></td>
-          <td>Apr 20, 2026</td>
-        </tr>
-        <tr>
-          <td>#ORD-0039</td>
-          <td>Carol Smith</td>
-          <td>5</td>
-          <td>$312.50</td>
-          <td><span class="badge badge--warning">Pending</span></td>
-          <td>Apr 19, 2026</td>
-        </tr>
-        <tr>
-          <td>#ORD-0038</td>
-          <td>David Lee</td>
-          <td>2</td>
-          <td>$89.00</td>
-          <td><span class="badge badge--success">Delivered</span></td>
-          <td>Apr 18, 2026</td>
-        </tr>
-        <tr>
-          <td>#ORD-0037</td>
-          <td>Eva Chen</td>
-          <td>4</td>
-          <td>$204.00</td>
-          <td><span class="badge badge--danger">Cancelled</span></td>
-          <td>Apr 17, 2026</td>
-        </tr>
+        }
       </tbody>
     </table>
   </div>
 </div>
+} @if (submitted()) {
+<div class="page">
+  <div class="card success-card">
+    <ui-alert type="success">
+      <strong>Order placed successfully.</strong>
+      Your order has been submitted and is being processed.
+    </ui-alert>
+    <div class="success-actions">
+      <ui-button variant="primary" type="button" (click)="startNewOrder()">
+        Place Another Order
+      </ui-button>
+      <ui-button type="button" (click)="submitted.set(false)">
+        Back to Orders
+      </ui-button>
+    </div>
+  </div>
+</div>
+} @if (showForm()) {
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">New Order</h1>
+    <p class="page-subtitle">Complete all steps to place your order</p>
+  </div>
+
+  <nav class="stepper" aria-label="Order form steps">
+    @for (step of steps; track step.n) {
+    <div
+      class="stepper-step"
+      [class.stepper-step--active]="currentStep() === step.n"
+      [class.stepper-step--done]="currentStep() > step.n"
+    >
+      <div
+        class="stepper-circle"
+        [attr.aria-current]="currentStep() === step.n ? 'step' : null"
+      >
+        @if (currentStep() > step.n) { ✓ } @else { {{ step.n }} }
+      </div>
+      <span class="stepper-label">{{ step.label }}</span>
+    </div>
+    @if (step.n < 3) {
+    <div
+      class="stepper-line"
+      [class.stepper-line--done]="currentStep() > step.n"
+    ></div>
+    } }
+  </nav>
+
+  <div class="card order-form-card">
+    <form [formGroup]="orderForm" (ngSubmit)="submitOrder()">
+      @if (currentStep() === 1) {
+      <fieldset class="form-fieldset" formGroupName="customer">
+        <legend class="form-legend">Customer Information</legend>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName" class="form-label">First Name</label>
+            <input
+              id="firstName"
+              type="text"
+              formControlName="firstName"
+              class="form-input"
+              autocomplete="given-name"
+              [attr.aria-invalid]="firstName.touched && firstName.invalid"
+              aria-describedby="firstName-error"
+            />
+            @if (firstName.touched && firstName.errors) {
+            <span id="firstName-error" class="form-error" role="alert">
+              @if (firstName.errors['required']) { First name is required. }
+              @else if (firstName.errors['minlength']) { First name must be at
+              least 2 characters. }
+            </span>
+            }
+          </div>
+          <div class="form-group">
+            <label for="lastName" class="form-label">Last Name</label>
+            <input
+              id="lastName"
+              type="text"
+              formControlName="lastName"
+              class="form-input"
+              autocomplete="family-name"
+              [attr.aria-invalid]="lastName.touched && lastName.invalid"
+              aria-describedby="lastName-error"
+            />
+            @if (lastName.touched && lastName.errors) {
+            <span id="lastName-error" class="form-error" role="alert">
+              @if (lastName.errors['required']) { Last name is required. } @else
+              if (lastName.errors['minlength']) { Last name must be at least 2
+              characters. }
+            </span>
+            }
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="email" class="form-label">Email Address</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            class="form-input"
+            autocomplete="email"
+            [attr.aria-invalid]="email.touched && email.invalid"
+            aria-describedby="email-error"
+          />
+          @if (email.touched && email.errors) {
+          <span id="email-error" class="form-error" role="alert">
+            @if (email.errors['required']) { Email is required. } @else if
+            (email.errors['email']) { Please enter a valid email address. }
+          </span>
+          }
+        </div>
+      </fieldset>
+      } @if (currentStep() === 2) {
+      <fieldset class="form-fieldset" formGroupName="details">
+        <legend class="form-legend">Order Details</legend>
+        <div class="form-group">
+          <label for="product" class="form-label">Product</label>
+          <select
+            id="product"
+            formControlName="product"
+            class="form-input"
+            [attr.aria-invalid]="product.touched && product.invalid"
+            aria-describedby="product-error"
+          >
+            <option value="" disabled>Select a product…</option>
+            @for (p of products; track p.value) {
+            <option [value]="p.value">{{ p.label }}</option>
+            }
+          </select>
+          @if (product.touched && product.errors) {
+          <span id="product-error" class="form-error" role="alert">
+            Please select a product.
+          </span>
+          }
+        </div>
+        <div class="form-group">
+          <label for="quantity" class="form-label">Quantity</label>
+          <input
+            id="quantity"
+            type="number"
+            formControlName="quantity"
+            class="form-input form-input--short"
+            min="1"
+            max="100"
+            [attr.aria-invalid]="quantity.touched && quantity.invalid"
+            aria-describedby="quantity-error"
+          />
+          @if (quantity.touched && quantity.errors) {
+          <span id="quantity-error" class="form-error" role="alert">
+            @if (quantity.errors['required']) { Quantity is required. } @else if
+            (quantity.errors['min']) { Minimum quantity is 1. } @else if
+            (quantity.errors['max']) { Maximum quantity is 100. }
+          </span>
+          }
+        </div>
+        <div class="form-group">
+          <label for="notes" class="form-label">
+            Notes
+            <span class="form-label-optional">(optional)</span>
+          </label>
+          <textarea
+            id="notes"
+            formControlName="notes"
+            class="form-input form-textarea"
+            rows="3"
+            placeholder="Any special instructions…"
+          ></textarea>
+        </div>
+      </fieldset>
+      } @if (currentStep() === 3) {
+      <div class="review-section">
+        <h2 class="form-legend">Review &amp; Confirm</h2>
+        <div class="review-group">
+          <h3 class="review-group-title">Customer Information</h3>
+          <dl class="review-list">
+            <div class="review-item">
+              <dt>Name</dt>
+              <dd>{{ firstName.value }} {{ lastName.value }}</dd>
+            </div>
+            <div class="review-item">
+              <dt>Email</dt>
+              <dd>{{ email.value }}</dd>
+            </div>
+          </dl>
+        </div>
+        <div class="review-group">
+          <h3 class="review-group-title">Order Details</h3>
+          <dl class="review-list">
+            <div class="review-item">
+              <dt>Product</dt>
+              <dd>{{ selectedProductLabel() }}</dd>
+            </div>
+            <div class="review-item">
+              <dt>Quantity</dt>
+              <dd>{{ quantity.value }}</dd>
+            </div>
+            @if (notes.value) {
+            <div class="review-item">
+              <dt>Notes</dt>
+              <dd>{{ notes.value }}</dd>
+            </div>
+            }
+          </dl>
+        </div>
+      </div>
+      }
+
+      <div class="form-actions">
+        <ui-button
+          type="button"
+          (click)="currentStep() === 1 ? cancelForm() : prevStep()"
+        >
+          {{ currentStep() === 1 ? 'Cancel' : 'Back' }}
+        </ui-button>
+        @if (currentStep() < 3) {
+        <ui-button variant="primary" type="button" (click)="nextStep()">
+          Next
+        </ui-button>
+        } @else {
+        <ui-button variant="primary" type="submit"> Place Order </ui-button>
+        }
+      </div>
+    </form>
+  </div>
+</div>
+}

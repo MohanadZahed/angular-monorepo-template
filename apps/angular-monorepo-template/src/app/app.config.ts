@@ -11,15 +11,26 @@ import {
   withEventReplay,
 } from '@angular/platform-browser';
 import { FeatureFlagService } from '@angular-monorepo-template/core';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withFetch,
+  withInterceptors,
+} from '@angular/common/http';
 import { backendConfigProvider } from './config/backend.config';
+import {
+  authInterceptor,
+  errorInterceptor,
+} from '@angular-monorepo-template/core';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideClientHydration(withEventReplay()),
     provideBrowserGlobalErrorListeners(),
     provideRouter(appRoutes),
-    provideHttpClient(withFetch()),
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([authInterceptor, errorInterceptor]),
+    ),
     provideAppInitializer(() => {
       const featureFlagService = inject(FeatureFlagService);
       return featureFlagService.loadFlags();
