@@ -23,7 +23,7 @@ export default [
   ...nx.configs['flat/angular'],
   ...nx.configs['flat/angular-template'],
   {
-    files: ['**/*.ts'],
+    files: ['apps/**/*.ts'],
     rules: {
       '@angular-eslint/directive-selector': [
         'error',
@@ -41,6 +41,11 @@ export default [
           style: 'kebab-case',
         },
       ],
+    },
+  },
+  {
+    files: ['**/*.ts'],
+    rules: {
       '@angular-eslint/template/prefer-control-flow': 'off',
     },
   },

@@ -1,0 +1,20 @@
+<header class="app-header">
+  <a class="app-brand" routerLink="/">Angular MF</a>
+
+  @if (isLoggedIn()) {
+  <nav class="app-nav" aria-label="Main navigation">
+    @if (showStatistics) {
+    <a routerLink="/statistics" routerLinkActive="active">Statistics</a>
+    } @if (showInvoices) {
+    <a routerLink="/invoices" routerLinkActive="active">Invoices</a>
+    } @if (showOrders) {
+    <a routerLink="/orders" routerLinkActive="active">Orders</a>
+    }
+  </nav>
+  <div class="app-header-actions">
+    <button class="btn btn--logout" type="button" (click)="logout()">
+      Logout
+    </button>
+  </div>
+  }
+</header>

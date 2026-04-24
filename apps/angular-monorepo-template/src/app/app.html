@@ -1,39 +1,4 @@
-<ul>
-  <li>Statistics: {{ showStatistics }}</li>
-  <li>Invoices: {{ showInvoices }}</li>
-  <li>Orders: {{ showOrders }}</li>
-</ul>
-<div id="welcome">
-  <h1>
-    <span> Hello there, </span>
-    Welcome angular-monorepo-template 👋💃🏻🪩🎶
-  </h1>
-</div>
-<nav>
-  <ul>
-    <li><a routerLink="/">Home</a></li>
-    <li><a routerLink="login">Login</a></li>
-    <li>
-      <a routerLink="/statistics" routerLinkActive="active">Statistics</a>
-    </li>
-    <li>
-      <a routerLink="/invoices" routerLinkActive="active">Invoices</a>
-    </li>
-    <li>
-      <a routerLink="/orders" routerLinkActive="active">Orders</a>
-    </li>
-  </ul>
-</nav>
-
-<!-- <ul class="remote-menu">
-  <li><a routerLink="/">Home</a></li>
-  <li><a routerLink="login">Login</a></li>
-</ul> -->
-<!-- <router-outlet></router-outlet>
-<ng-mf-nx-welcome></ng-mf-nx-welcome> -->
-
-<div class="dashboard-nav">Admin Dashboard</div>
-<div *ngIf="isLoggedIn$ | async; else signIn">
-  You are authenticated so you can see this content.
-</div>
-<ng-template #signIn><router-outlet></router-outlet></ng-template>
+<lib-app-header />
+<main class="app-main">
+  <router-outlet />
+</main>
