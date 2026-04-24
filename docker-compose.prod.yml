@@ -1,4 +1,15 @@
 services:
+  angular-monorepo-template:
+    build:
+      args:
+        LOGIN_REMOTE_URL: http://13.50.4.156:8082
+    ports:
+      - '8080:4000'
+
+  login:
+    ports:
+      - '8082:80'
+
   json-server:
     volumes:
       - /home/ec2-user/config.json:/app/config.json

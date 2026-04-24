@@ -3,11 +3,20 @@ services:
     container_name: angular-monorepo-template
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: apps/angular-monorepo-template/Dockerfile
     ports:
-      - "80:4000"
+      - '80:4000'
     depends_on:
       - json-server
+      - login
+
+  login:
+    container_name: login
+    build:
+      context: .
+      dockerfile: apps/login/Dockerfile
+    ports:
+      - '4201:80'
 
   json-server:
     container_name: json-server
@@ -15,4 +24,4 @@ services:
       context: ./json-server
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - '3000:3000'

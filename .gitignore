@@ -43,3 +43,6 @@ Thumbs.db
 
 .angular
 mos-angular-monorepo-template.pem
+.nx/polygraph
+.claude/worktrees
+.claude/settings.local.json

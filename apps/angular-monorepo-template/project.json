@@ -1,0 +1,176 @@
+{
+  "name": "angular-monorepo-template",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "ng-mf",
+  "sourceRoot": "apps/angular-monorepo-template/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/angular:webpack-browser",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/angular-monorepo-template/browser",
+        "index": "apps/angular-monorepo-template/src/index.html",
+        "main": "apps/angular-monorepo-template/src/main.ts",
+        "tsConfig": "apps/angular-monorepo-template/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/angular-monorepo-template/public"
+          }
+        ],
+        "styles": ["apps/angular-monorepo-template/src/styles.scss"],
+        "customWebpackConfig": {
+          "path": "apps/angular-monorepo-template/webpack.config.ts"
+        }
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
+            }
+          ],
+          "fileReplacements": [
+            {
+              "replace": "apps/angular-monorepo-template/environments/environment.ts",
+              "with": "apps/angular-monorepo-template/environments/environment.prod.ts"
+            }
+          ],
+          "outputHashing": "all",
+          "customWebpackConfig": {
+            "path": "apps/angular-monorepo-template/webpack.prod.config.ts"
+          }
+        },
+        "development": {
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@nx/angular:module-federation-dev-server",
+      "options": {
+        "port": 4200,
+        "publicHost": "http://localhost:4200"
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "angular-monorepo-template:build:production"
+        },
+        "development": {
+          "buildTarget": "angular-monorepo-template:build:development"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "options": {
+        "buildTarget": "angular-monorepo-template:build"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/angular-monorepo-template/jest.config.cts",
+        "tsConfig": "apps/angular-monorepo-template/tsconfig.spec.json"
+      }
+    },
+    "serve-static": {
+      "continuous": true,
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "angular-monorepo-template:build",
+        "port": 4200,
+        "spa": true
+      }
+    },
+    "server": {
+      "dependsOn": ["build"],
+      "executor": "@nx/angular:webpack-server",
+      "options": {
+        "outputPath": "dist/apps/angular-monorepo-template/server",
+        "main": "apps/angular-monorepo-template/src/server.ts",
+        "tsConfig": "apps/angular-monorepo-template/tsconfig.server.json",
+        "inlineStyleLanguage": "scss",
+        "customWebpackConfig": {
+          "path": "apps/angular-monorepo-template/webpack.server.config.ts"
+        }
+      },
+      "configurations": {
+        "production": {
+          "outputHashing": "media"
+        },
+        "development": {
+          "buildOptimizer": false,
+          "optimization": false,
+          "sourceMap": true,
+          "extractLicenses": false
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve-ssr": {
+      "continuous": true,
+      "executor": "@nx/angular:module-federation-dev-ssr",
+      "configurations": {
+        "development": {
+          "browserTarget": "angular-monorepo-template:build:development",
+          "serverTarget": "angular-monorepo-template:server:development"
+        },
+        "production": {
+          "browserTarget": "angular-monorepo-template:build:production",
+          "serverTarget": "angular-monorepo-template:server:production"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "prerender": {
+      "executor": "@angular-devkit/build-angular:prerender",
+      "options": {
+        "routes": ["/"]
+      },
+      "configurations": {
+        "development": {
+          "browserTarget": "angular-monorepo-template:build:development",
+          "serverTarget": "angular-monorepo-template:server:development"
+        },
+        "production": {
+          "browserTarget": "angular-monorepo-template:build:production",
+          "serverTarget": "angular-monorepo-template:server:production"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "build-ssr": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "nx run angular-monorepo-template:build",
+          "nx run angular-monorepo-template:server"
+        ],
+        "parallel": false
+      }
+    }
+  }
+}

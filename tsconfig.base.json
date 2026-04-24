@@ -11,7 +11,8 @@
       "@angular-monorepo-template/core": ["libs/core/src/index.ts"],
       "@angular-monorepo-template/statistics": ["libs/statistics/src/index.ts"],
       "@angular-monorepo-template/invoices": ["libs/invoices/src/index.ts"],
-      "@angular-monorepo-template/orders": ["libs/orders/src/index.ts"]
+      "@angular-monorepo-template/orders": ["libs/orders/src/index.ts"],
+      "login/Routes": ["apps/login/src/app/remote-entry/entry.routes.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
