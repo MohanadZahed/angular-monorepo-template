@@ -108,10 +108,10 @@
               aria-describedby="firstName-error"
             />
             @if (firstName.touched && firstName.errors) {
+            <!-- prettier-ignore -->
             <span id="firstName-error" class="form-error" role="alert">
               @if (firstName.errors['required']) { First name is required. }
-              @else if (firstName.errors['minlength']) { First name must be at
-              least 2 characters. }
+              @else if (firstName.errors['minlength']) { First name must be at least 2 characters. }
             </span>
             }
           </div>
@@ -127,10 +127,10 @@
               aria-describedby="lastName-error"
             />
             @if (lastName.touched && lastName.errors) {
+            <!-- prettier-ignore -->
             <span id="lastName-error" class="form-error" role="alert">
-              @if (lastName.errors['required']) { Last name is required. } @else
-              if (lastName.errors['minlength']) { Last name must be at least 2
-              characters. }
+              @if (lastName.errors['required']) { Last name is required. }
+              @else if (lastName.errors['minlength']) { Last name must be at least 2 characters. }
             </span>
             }
           </div>
@@ -147,9 +147,10 @@
             aria-describedby="email-error"
           />
           @if (email.touched && email.errors) {
+          <!-- prettier-ignore -->
           <span id="email-error" class="form-error" role="alert">
-            @if (email.errors['required']) { Email is required. } @else if
-            (email.errors['email']) { Please enter a valid email address. }
+            @if (email.errors['required']) { Email is required. }
+            @else if (email.errors['email']) { Please enter a valid email address. }
           </span>
           }
         </div>
@@ -190,10 +191,11 @@
             aria-describedby="quantity-error"
           />
           @if (quantity.touched && quantity.errors) {
+          <!-- prettier-ignore -->
           <span id="quantity-error" class="form-error" role="alert">
-            @if (quantity.errors['required']) { Quantity is required. } @else if
-            (quantity.errors['min']) { Minimum quantity is 1. } @else if
-            (quantity.errors['max']) { Maximum quantity is 100. }
+            @if (quantity.errors['required']) { Quantity is required. }
+            @else if (quantity.errors['min']) { Minimum quantity is 1. }
+            @else if (quantity.errors['max']) { Maximum quantity is 100. }
           </span>
           }
         </div>
