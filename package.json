@@ -8,6 +8,7 @@
     "build:angular-monorepo-template": "nx run angular-monorepo-template:build-ssr",
     "test:angular-monorepo-template": "nx test angular-monorepo-template",
     "e2e:angular-monorepo-template": "nx e2e angular-monorepo-template-e2e",
+    "e2e:login": "nx e2e login-e2e",
     "docker:push": "docker buildx build --platform linux/amd64,linux/arm64 -t mzahed23/angular-monorepo-template:latest --push .",
     "prepare": "husky || true"
   },
