@@ -1,4 +1,5 @@
 export * from './lib/core/services/feature-flag.service';
+export * from './lib/core/services/logger.service';
 export * from './lib/core/services/user-auth.service';
 export * from './lib/core/interceptors/auth.interceptor';
 export * from './lib/core/interceptors/error.interceptor';

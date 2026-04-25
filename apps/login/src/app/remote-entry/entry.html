@@ -17,16 +17,15 @@
           class="form-input"
           autocomplete="username"
           placeholder="Username"
-          [attr.aria-invalid]="username.touched && username.invalid"
-          aria-describedby="username-error"
+          [attr.aria-invalid]="username.touched && username.invalid ? true : null"
+          [attr.aria-describedby]="username.touched && username.invalid ? 'username-error' : null"
         />
-        @if (username.touched && username.errors) {
         <span id="username-error" class="form-error" role="alert">
-          @if (username.errors['required']) { Username is required. } @else if
-          (username.errors['minlength']) { Username must be at least 2
+          @if (username.touched && username.errors?.['required']) { Username is
+          required. } @else if (username.touched &&
+          username.errors?.['minlength']) { Username must be at least 2
           characters. }
         </span>
-        }
       </div>
       <div class="form-group">
         <label for="password" class="form-label">Password</label>
@@ -37,16 +36,15 @@
           class="form-input"
           autocomplete="current-password"
           placeholder="Password"
-          [attr.aria-invalid]="password.touched && password.invalid"
-          aria-describedby="password-error"
+          [attr.aria-invalid]="password.touched && password.invalid ? true : null"
+          [attr.aria-describedby]="password.touched && password.invalid ? 'password-error' : null"
         />
-        @if (password.touched && password.errors) {
         <span id="password-error" class="form-error" role="alert">
-          @if (password.errors['required']) { Password is required. } @else if
-          (password.errors['minlength']) { Password must be at least 4
+          @if (password.touched && password.errors?.['required']) { Password is
+          required. } @else if (password.touched &&
+          password.errors?.['minlength']) { Password must be at least 4
           characters. }
         </span>
-        }
       </div>
       @if (loginFailed()) {
       <p class="form-error form-error--summary" role="alert">

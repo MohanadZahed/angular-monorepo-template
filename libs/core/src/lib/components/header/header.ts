@@ -1,6 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { UserAuthService } from '../../core/services/user-auth.service';
 import { FeatureFlagService } from '../../core/services/feature-flag.service';
 
@@ -15,13 +20,28 @@ export class AppHeader {
   private featureFlagService = inject(FeatureFlagService);
   private router = inject(Router);
 
-  isLoggedIn = toSignal(this.authService.isUserLoggedIn$, {
-    initialValue: false,
-  });
+  isLoggedIn = this.authService.isLoggedIn;
+  currentUser = this.authService.currentUser;
 
   showStatistics = this.featureFlagService.isEnabled('statistics');
   showInvoices = this.featureFlagService.isEnabled('invoices');
   showOrders = this.featureFlagService.isEnabled('orders');
+
+  readonly authAnnouncement = signal('');
+
+  constructor() {
+    let ready = false;
+    effect(() => {
+      const loggedIn = this.authService.isLoggedIn();
+      const user = this.authService.currentUser();
+      if (ready) {
+        this.authAnnouncement.set(
+          loggedIn ? `Signed in as ${user}` : 'Signed out',
+        );
+      }
+      ready = true;
+    });
+  }
 
   logout() {
     this.authService.logout();

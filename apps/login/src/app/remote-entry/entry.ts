@@ -7,7 +7,6 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserAuthService } from '@angular-monorepo-template/core';
-import { take } from 'rxjs';
 
 @Component({
   imports: [ReactiveFormsModule],
@@ -45,13 +44,11 @@ export class RemoteEntry {
     }
 
     const { username, password } = this.loginForm.getRawValue();
-    this.userService.checkCredentials(username, password);
-    this.userService.isUserLoggedIn$.pipe(take(1)).subscribe((loggedIn) => {
-      if (loggedIn) {
-        this.router.navigate(['/']);
-      } else {
-        this.loginFailed.set(true);
-      }
-    });
+    const success = this.userService.checkCredentials(username, password);
+    if (success) {
+      this.router.navigate(['/']);
+    } else {
+      this.loginFailed.set(true);
+    }
   }
 }
