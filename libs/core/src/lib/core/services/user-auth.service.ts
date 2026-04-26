@@ -48,12 +48,17 @@ export class UserAuthService {
     return payload?.sub ?? null;
   });
 
+  readonly isAdmin = computed(() => this.currentUser() === 'admin');
+
   getToken(): string | null {
     return this.isBrowser ? localStorage.getItem(AUTH_KEY) : null;
   }
 
   checkCredentials(username: string, password: string): boolean {
-    if (username === 'demo' && password === 'demo') {
+    const validCredentials =
+      (username === 'demo' && password === 'demo') ||
+      (username === 'admin' && password === 'admin');
+    if (validCredentials) {
       if (this.isBrowser)
         localStorage.setItem(AUTH_KEY, buildFakeJwt(username));
       this._isLoggedIn.set(true);

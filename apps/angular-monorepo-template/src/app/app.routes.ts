@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import {
   featureFlagGuard,
+  isAdmin,
   isAuthenticated,
   redirectIfAuthenticated,
   unsavedChangesGuard,
@@ -41,6 +42,14 @@ export const appRoutes: Routes = [
     canDeactivate: [unsavedChangesGuard],
     loadComponent: () =>
       import('@angular-monorepo-template/orders').then((m) => m.Orders),
+  },
+  {
+    path: 'admin/feature-flags',
+    canActivate: [isAdmin],
+    loadComponent: () =>
+      import('@angular-monorepo-template/core').then(
+        (m) => m.AdminFeatureFlags,
+      ),
   },
   {
     path: 'not-found',

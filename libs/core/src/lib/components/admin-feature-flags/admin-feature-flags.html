@@ -1,0 +1,58 @@
+<section class="page">
+  <header class="page-header">
+    <h1 class="page-title">Feature Flags</h1>
+    <p class="page-subtitle">
+      Toggle features on or off. Changes take effect after saving.
+    </p>
+  </header>
+
+  <ui-card>
+    @if (entries().length === 0) {
+    <p class="empty">No feature flags found.</p>
+    } @else {
+    <ul class="flag-list">
+      @for (entry of entries(); track entry[0]) {
+      <li class="flag-row">
+        <label class="flag-label" [attr.for]="'flag-' + entry[0]">
+          {{ entry[0] }}
+        </label>
+        <label class="switch">
+          <input
+            type="checkbox"
+            [id]="'flag-' + entry[0]"
+            [checked]="entry[1]"
+            (change)="toggle(entry[0], $any($event.target).checked)"
+          />
+          <span class="slider" aria-hidden="true"></span>
+          <span class="sr-only">{{ entry[0] }}</span>
+        </label>
+      </li>
+      }
+    </ul>
+    }
+
+    <div class="actions">
+      <ui-button
+        variant="primary"
+        type="button"
+        [loading]="saving()"
+        [disabled]="saving() || entries().length === 0"
+        (click)="save()"
+      >
+        Save
+      </ui-button>
+    </div>
+  </ui-card>
+
+  @if (status() === 'success') {
+  <div class="status-row">
+    <ui-alert type="success">Feature flags saved successfully.</ui-alert>
+  </div>
+  } @else if (status() === 'error') {
+  <div class="status-row">
+    <ui-alert type="error">
+      Failed to save feature flags. Please try again.
+    </ui-alert>
+  </div>
+  }
+</section>

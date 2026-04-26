@@ -11,6 +11,7 @@ export * from './lib/core/guards/unsaved-changes.guard';
 export * from './lib/core/config';
 export * from './lib/components/not-found/not-found';
 export * from './lib/components/header/header';
+export * from './lib/components/admin-feature-flags/admin-feature-flags';
 export * from './lib/components/ui/button/ui-button';
 export * from './lib/components/ui/card/ui-card';
 export * from './lib/components/ui/alert/ui-alert';

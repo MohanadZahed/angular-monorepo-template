@@ -22,6 +22,7 @@ export class AppHeader {
 
   isLoggedIn = this.authService.isLoggedIn;
   currentUser = this.authService.currentUser;
+  isAdmin = this.authService.isAdmin;
 
   showStatistics = this.featureFlagService.isEnabled('statistics');
   showInvoices = this.featureFlagService.isEnabled('invoices');

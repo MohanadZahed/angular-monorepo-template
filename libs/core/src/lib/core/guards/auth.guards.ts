@@ -19,3 +19,11 @@ export const redirectIfAuthenticated: CanActivateFn = () => {
   const router = inject(Router);
   return authService.isLoggedIn() ? router.createUrlTree(['/']) : true;
 };
+
+export const isAdmin: CanActivateFn = () => {
+  const authService = inject(UserAuthService);
+  const router = inject(Router);
+
+  if (!authService.isLoggedIn()) return router.createUrlTree(['/login']);
+  return authService.isAdmin() || router.createUrlTree(['/not-found']);
+};

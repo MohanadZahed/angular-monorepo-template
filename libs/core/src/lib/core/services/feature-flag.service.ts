@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap, catchError, of } from 'rxjs';
 import { BACKEND_CONFIG } from '../config/backend/backend-config.token';
@@ -9,6 +9,8 @@ export interface FeatureFlags {
   invoices: boolean;
   orders: boolean;
 }
+
+export type FeatureFlagMap = Record<string, boolean>;
 
 const DEFAULT_FLAGS: FeatureFlags = {
   statistics: false,
@@ -21,27 +23,39 @@ export class FeatureFlagService {
   private http = inject(HttpClient);
   private config = inject(BACKEND_CONFIG);
   private logger = inject(LoggerService);
-  private flags: FeatureFlags = DEFAULT_FLAGS;
+  private readonly _flags = signal<FeatureFlagMap>({ ...DEFAULT_FLAGS });
+  readonly flags = this._flags.asReadonly();
 
   loadFlags() {
     this.logger.debug(
       'Loading feature flags from',
       this.config.rest.featureFlagsUrl,
     );
-    return this.http.get<FeatureFlags>(this.config.rest.featureFlagsUrl).pipe(
+    return this.http.get<FeatureFlagMap>(this.config.rest.featureFlagsUrl).pipe(
       tap((response) => {
         this.logger.info('Feature flags loaded', response);
-        this.flags = response;
+        this._flags.set(response);
       }),
       catchError(() => {
-        this.flags = DEFAULT_FLAGS;
+        this._flags.set({ ...DEFAULT_FLAGS });
         this.logger.error('Failed to load feature flags');
         return of(null);
       }),
     );
   }
 
+  saveFlags(flags: FeatureFlagMap) {
+    return this.http
+      .put<FeatureFlagMap>(this.config.rest.featureFlagsUrl, flags)
+      .pipe(
+        tap((response) => {
+          this.logger.info('Feature flags saved', response);
+          this._flags.set(response ?? flags);
+        }),
+      );
+  }
+
   isEnabled(flag: keyof FeatureFlags): boolean {
-    return this.flags[flag];
+    return !!this._flags()[flag];
   }
 }

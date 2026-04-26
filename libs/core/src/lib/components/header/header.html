@@ -9,6 +9,10 @@
     <a routerLink="/invoices" routerLinkActive="active">Invoices</a>
     } @if (showOrders) {
     <a routerLink="/orders" routerLinkActive="active">Orders</a>
+    } @if (isAdmin()) {
+    <a routerLink="/admin/feature-flags" routerLinkActive="active"
+      >Feature Flags</a
+    >
     }
   </nav>
   <div class="app-header-actions">
