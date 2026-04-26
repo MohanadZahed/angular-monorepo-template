@@ -6,6 +6,8 @@ export const backendConfig: BackendConfig = {
   production: environment.production,
   rest: {
     featureFlagsUrl: environment.featureFlagsUrl,
+    ordersUrl: environment.ordersUrl,
+    invoicesUrl: environment.invoicesUrl,
     endpoints: {},
   },
 };

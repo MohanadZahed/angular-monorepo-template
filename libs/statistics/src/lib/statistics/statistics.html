@@ -1,72 +1,119 @@
 <div class="page">
   <div class="page-header">
     <h1 class="page-title">Statistics</h1>
-    <p class="page-subtitle">Key metrics and performance indicators</p>
+    <p class="page-subtitle">Live KPIs derived from order data</p>
   </div>
+
+  @if (error()) {
+  <ui-alert type="error">{{ error() }}</ui-alert>
+  }
 
   <div class="stat-grid">
     <div class="card stat-card">
+      <span class="card-title">Total Orders</span>
+      <div class="stat-value" aria-live="polite">{{ totalOrders() }}</div>
+      <div class="stat-label">Across all customers</div>
+    </div>
+    <div class="card stat-card">
       <span class="card-title">Total Revenue</span>
-      <div class="stat-value">$84,250</div>
-      <div class="stat-label">All time earnings</div>
-      <div class="stat-trend stat-trend--up">&#x25B2; 12.4% vs last month</div>
+      <div class="stat-value" aria-live="polite">
+        {{ totalRevenueDisplay() }}
+      </div>
+      <div class="stat-label">Excludes cancelled orders</div>
     </div>
     <div class="card stat-card">
-      <span class="card-title">Active Users</span>
-      <div class="stat-value">1,243</div>
-      <div class="stat-label">Registered accounts</div>
-      <div class="stat-trend stat-trend--up">&#x25B2; 8.1% vs last month</div>
-    </div>
-    <div class="card stat-card">
-      <span class="card-title">Conversion Rate</span>
-      <div class="stat-value">3.8%</div>
-      <div class="stat-label">Visitors to customers</div>
-      <div class="stat-trend stat-trend--down">&#x25BC; 0.3% vs last month</div>
-    </div>
-    <div class="card stat-card">
-      <span class="card-title">Monthly Growth</span>
-      <div class="stat-value">+18%</div>
-      <div class="stat-label">Month over month</div>
-      <div class="stat-trend stat-trend--up">&#x25B2; Best quarter yet</div>
+      <span class="card-title">Avg. Order Value</span>
+      <div class="stat-value" aria-live="polite">
+        {{ avgOrderValueDisplay() }}
+      </div>
+      <div class="stat-label">Mean of completed orders</div>
     </div>
   </div>
 
   <div class="card">
-    <h2 class="card-title" style="margin-bottom: 1rem">Top Products</h2>
-    <table class="data-table" aria-label="Top products by revenue">
+    <h2 class="card-title">Revenue per Day</h2>
+    <p class="muted" id="chart-desc">{{ chartSummary() }}</p>
+    @if (loading() && bars().length === 0) {
+    <p class="muted" role="status" aria-live="polite">Loading chart…</p>
+    } @else if (bars().length === 0) {
+    <p class="muted">No data to chart.</p>
+    } @else {
+    <svg
+      role="img"
+      aria-labelledby="chart-desc"
+      [attr.viewBox]="chartViewBox()"
+      [attr.height]="chartHeight + 28"
+      [attr.width]="chartWidth()"
+      class="bar-chart"
+    >
+      @for (bar of bars(); track bar.date) {
+      <g>
+        <rect
+          [attr.x]="bar.x"
+          [attr.y]="barY(bar)"
+          [attr.width]="bar.width"
+          [attr.height]="bar.height"
+          rx="3"
+          class="bar-chart-rect"
+        >
+          <title>
+            {{ formatLabel(bar.date) }}: ${{ bar.total.toFixed(0) }}
+          </title>
+        </rect>
+        <text
+          [attr.x]="bar.x + bar.width / 2"
+          [attr.y]="chartHeight + 18"
+          text-anchor="middle"
+          class="bar-chart-label"
+        >
+          {{ formatLabel(bar.date) }}
+        </text>
+      </g>
+      }
+    </svg>
+
+    <table class="visually-hidden" aria-label="Revenue per day data table">
+      <caption>
+        Revenue per day
+      </caption>
       <thead>
         <tr>
-          <th scope="col">Product</th>
-          <th scope="col">Units Sold</th>
+          <th scope="col">Date</th>
           <th scope="col">Revenue</th>
-          <th scope="col">Growth</th>
         </tr>
       </thead>
       <tbody>
+        @for (bar of bars(); track bar.date) {
         <tr>
-          <td>Pro Subscription</td>
-          <td>412</td>
-          <td>$41,200</td>
-          <td><span class="badge badge--success">+22%</span></td>
+          <td>{{ formatLabel(bar.date) }}</td>
+          <td>${{ bar.total.toFixed(2) }}</td>
         </tr>
+        }
+      </tbody>
+    </table>
+    }
+  </div>
+
+  <div class="card">
+    <h2 class="card-title">Status Breakdown</h2>
+    <table class="data-table" aria-label="Orders grouped by status">
+      <thead>
         <tr>
-          <td>Enterprise Plan</td>
-          <td>38</td>
-          <td>$28,500</td>
-          <td><span class="badge badge--success">+15%</span></td>
+          <th scope="col">Status</th>
+          <th scope="col">Count</th>
         </tr>
+      </thead>
+      <tbody>
+        @for (row of statusBreakdown(); track row.status) {
         <tr>
-          <td>Starter Plan</td>
-          <td>620</td>
-          <td>$12,400</td>
-          <td><span class="badge badge--warning">+2%</span></td>
+          <td>{{ row.status }}</td>
+          <td>{{ row.count }}</td>
         </tr>
+        } @if (statusBreakdown().length === 0) {
         <tr>
-          <td>Add-ons</td>
-          <td>184</td>
-          <td>$2,150</td>
-          <td><span class="badge badge--danger">-4%</span></td>
+          <td colspan="2" class="muted">No data.</td>
         </tr>
+        }
       </tbody>
     </table>
   </div>

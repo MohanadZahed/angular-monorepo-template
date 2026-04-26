@@ -1,9 +1,9 @@
-
-
 export interface BackendConfig {
   production?: boolean;
   rest: {
     featureFlagsUrl: string;
+    ordersUrl: string;
+    invoicesUrl: string;
     prefix?: string;
     /**
      * Indicates whether or not cross-site Access-Control requests should be made
@@ -29,4 +29,3 @@ export interface SiteContextConfig {
   urlParameters?: string[];
   [contextName: string]: string[] | undefined;
 }
-

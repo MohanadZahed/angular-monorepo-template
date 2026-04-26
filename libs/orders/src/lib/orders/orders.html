@@ -13,6 +13,11 @@
   </div>
 
   <div class="card">
+    @if (loadError()) {
+    <ui-alert type="error">{{ loadError() }}</ui-alert>
+    } @if (loading() && orders().length === 0) {
+    <p class="muted" role="status" aria-live="polite">Loading orders…</p>
+    } @else {
     <table class="data-table" aria-label="Customer orders">
       <thead>
         <tr>
@@ -27,20 +32,25 @@
       <tbody>
         @for (order of orders(); track order.id) {
         <tr>
-          <td>{{ order.id }}</td>
+          <td>#{{ order.id }}</td>
           <td>{{ order.customer }}</td>
           <td>{{ order.items }}</td>
-          <td>{{ order.amount }}</td>
+          <td>{{ order.amountDisplay }}</td>
           <td>
             <span class="badge" [class]="order.badgeClass"
               >{{ order.status }}</span
             >
           </td>
-          <td>{{ order.date }}</td>
+          <td>{{ order.dateDisplay }}</td>
+        </tr>
+        } @if (!loading() && orders().length === 0) {
+        <tr>
+          <td colspan="6" class="muted">No orders yet.</td>
         </tr>
         }
       </tbody>
     </table>
+    }
   </div>
 </div>
 } @if (submitted()) {
@@ -263,7 +273,14 @@
           Next
         </ui-button>
         } @else {
-        <ui-button variant="primary" type="submit"> Place Order </ui-button>
+        <ui-button
+          variant="primary"
+          type="submit"
+          [disabled]="submitting()"
+          [loading]="submitting()"
+        >
+          {{ submitting() ? 'Placing…' : 'Place Order' }}
+        </ui-button>
         }
       </div>
     </form>

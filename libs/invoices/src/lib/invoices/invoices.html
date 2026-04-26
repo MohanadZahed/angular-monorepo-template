@@ -4,52 +4,111 @@
     <p class="page-subtitle">Track and manage client invoices</p>
   </div>
 
+  @if (error()) {
+  <ui-alert type="error">{{ error() }}</ui-alert>
+  }
+
   <div class="card">
+    <div class="invoice-toolbar">
+      <label class="form-label" for="statusFilter">Status</label>
+      <select
+        id="statusFilter"
+        class="form-input form-input--short"
+        [value]="statusFilter()"
+        (change)="onFilterChange($any($event.target).value)"
+      >
+        @for (opt of statusOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+      <span class="muted" role="status" aria-live="polite">
+        {{ rangeLabel() }}
+      </span>
+    </div>
+
+    @if (loading() && pageRows().length === 0) {
+    <p class="muted" role="status" aria-live="polite">Loading invoices…</p>
+    } @else {
     <table class="data-table" aria-label="Client invoices">
       <thead>
         <tr>
           <th scope="col">Invoice #</th>
           <th scope="col">Client</th>
           <th scope="col">Issued</th>
-          <th scope="col">Due Date</th>
-          <th scope="col">Amount</th>
+          <th scope="col" [attr.aria-sort]="ariaSort('due')">
+            <button
+              type="button"
+              class="sort-btn"
+              (click)="toggleSort('due')"
+              [attr.aria-pressed]="sortKey() === 'due'"
+            >
+              Due Date @if (sortKey() === 'due') {
+              <span aria-hidden="true"
+                >{{ sortDir() === 'asc' ? '▲' : '▼' }}</span
+              >
+              }
+            </button>
+          </th>
+          <th scope="col" [attr.aria-sort]="ariaSort('amount')">
+            <button
+              type="button"
+              class="sort-btn"
+              (click)="toggleSort('amount')"
+              [attr.aria-pressed]="sortKey() === 'amount'"
+            >
+              Amount @if (sortKey() === 'amount') {
+              <span aria-hidden="true"
+                >{{ sortDir() === 'asc' ? '▲' : '▼' }}</span
+              >
+              }
+            </button>
+          </th>
           <th scope="col">Status</th>
         </tr>
       </thead>
       <tbody>
+        @for (row of pageRows(); track row.id) {
         <tr>
-          <td>INV-2026-011</td>
-          <td>Acme Corp</td>
-          <td>Apr 1, 2026</td>
-          <td>Apr 15, 2026</td>
-          <td>$3,200.00</td>
-          <td><span class="badge badge--success">Paid</span></td>
+          <td>{{ row.id }}</td>
+          <td>{{ row.client }}</td>
+          <td>{{ row.issuedDisplay }}</td>
+          <td>{{ row.dueDisplay }}</td>
+          <td>{{ row.amountDisplay }}</td>
+          <td>
+            <span class="badge" [class]="row.badgeClass">
+              {{ row.statusLabel }}
+            </span>
+          </td>
         </tr>
+        } @if (pageRows().length === 0 && !loading()) {
         <tr>
-          <td>INV-2026-012</td>
-          <td>Globex Ltd</td>
-          <td>Apr 5, 2026</td>
-          <td>Apr 20, 2026</td>
-          <td>$1,750.00</td>
-          <td><span class="badge badge--success">Paid</span></td>
+          <td colspan="6" class="muted">
+            No invoices match the current filter.
+          </td>
         </tr>
-        <tr>
-          <td>INV-2026-013</td>
-          <td>Initech Inc</td>
-          <td>Apr 10, 2026</td>
-          <td>Apr 24, 2026</td>
-          <td>$5,600.00</td>
-          <td><span class="badge badge--warning">Pending</span></td>
-        </tr>
-        <tr>
-          <td>INV-2026-014</td>
-          <td>Umbrella Co</td>
-          <td>Mar 28, 2026</td>
-          <td>Apr 11, 2026</td>
-          <td>$920.00</td>
-          <td><span class="badge badge--danger">Overdue</span></td>
-        </tr>
+        }
       </tbody>
     </table>
+    }
+
+    <nav class="pagination" aria-label="Invoice pagination">
+      <button
+        type="button"
+        class="btn"
+        (click)="prevPage()"
+        [disabled]="page() === 1"
+      >
+        ‹ Previous
+      </button>
+      <span class="muted">Page {{ page() }} of {{ totalPages() }}</span>
+      <button
+        type="button"
+        class="btn"
+        (click)="nextPage()"
+        [disabled]="page() === totalPages()"
+      >
+        Next ›
+      </button>
+    </nav>
   </div>
 </div>

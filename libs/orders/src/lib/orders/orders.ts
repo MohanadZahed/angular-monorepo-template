@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   inject,
+  OnInit,
   signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -27,7 +28,7 @@ const PRODUCTS = [
   styleUrl: './orders.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Orders implements HasUnsavedChanges {
+export class Orders implements OnInit, HasUnsavedChanges {
   private fb = inject(FormBuilder);
   private ordersService = inject(OrdersService);
 
@@ -39,9 +40,12 @@ export class Orders implements HasUnsavedChanges {
   ];
 
   readonly orders = this.ordersService.orders;
+  readonly loading = this.ordersService.loading;
+  readonly loadError = this.ordersService.error;
 
   showForm = signal(false);
   submitted = signal(false);
+  submitting = signal(false);
   currentStep = signal(1);
 
   orderForm = this.fb.nonNullable.group({
@@ -91,6 +95,10 @@ export class Orders implements HasUnsavedChanges {
       this.product.value,
   );
 
+  ngOnInit(): void {
+    this.ordersService.loadOrders().subscribe();
+  }
+
   hasUnsavedChanges(): boolean {
     return this.orderForm.dirty && !this.submitted();
   }
@@ -128,18 +136,21 @@ export class Orders implements HasUnsavedChanges {
     }
     const { customer, details } = this.orderForm.getRawValue();
     const productObj = this.products.find((p) => p.value === details.product);
-    const amount = productObj
-      ? `$${(productObj.price * details.quantity).toFixed(2)}`
-      : '$0.00';
+    const amount = productObj ? productObj.price * details.quantity : 0;
 
-    this.ordersService.addOrder(
-      `${customer.firstName} ${customer.lastName}`,
-      details.quantity,
-      amount,
-    );
-
-    this.orderForm.reset({ details: { quantity: 1 } });
-    this.submitted.set(true);
-    this.showForm.set(false);
+    this.submitting.set(true);
+    this.ordersService
+      .addOrder({
+        customer: `${customer.firstName} ${customer.lastName}`,
+        items: details.quantity,
+        amount,
+      })
+      .subscribe((result) => {
+        this.submitting.set(false);
+        if (!result) return;
+        this.orderForm.reset({ details: { quantity: 1 } });
+        this.submitted.set(true);
+        this.showForm.set(false);
+      });
   }
 }

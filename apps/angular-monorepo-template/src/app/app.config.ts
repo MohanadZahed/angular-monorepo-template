@@ -1,5 +1,6 @@
 import {
   ApplicationConfig,
+  ErrorHandler,
   inject,
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
@@ -10,7 +11,11 @@ import {
   provideClientHydration,
   withEventReplay,
 } from '@angular/platform-browser';
-import { FeatureFlagService } from '@angular-monorepo-template/core';
+import {
+  FeatureFlagService,
+  GlobalErrorHandler,
+  WebVitalsService,
+} from '@angular-monorepo-template/core';
 import {
   provideHttpClient,
   withFetch,
@@ -35,6 +40,8 @@ export const appConfig: ApplicationConfig = {
       const featureFlagService = inject(FeatureFlagService);
       return featureFlagService.loadFlags();
     }),
+    provideAppInitializer(() => inject(WebVitalsService).start()),
     backendConfigProvider,
+    { provide: ErrorHandler, useClass: GlobalErrorHandler },
   ],
 };

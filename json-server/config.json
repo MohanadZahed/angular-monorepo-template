@@ -1,7 +1,155 @@
 {
   "featureFlags": {
     "statistics": true,
-    "invoices": false,
+    "invoices": true,
     "orders": true
-  }
+  },
+  "orders": [
+    {
+      "id": "ORD-0041",
+      "customer": "Alice Johnson",
+      "items": 3,
+      "amount": 149.0,
+      "status": "Delivered",
+      "date": "2026-04-21"
+    },
+    {
+      "id": "ORD-0040",
+      "customer": "Bob Martinez",
+      "items": 1,
+      "amount": 59.99,
+      "status": "Shipped",
+      "date": "2026-04-20"
+    },
+    {
+      "id": "ORD-0039",
+      "customer": "Carol Smith",
+      "items": 5,
+      "amount": 312.5,
+      "status": "Pending",
+      "date": "2026-04-19"
+    },
+    {
+      "id": "ORD-0038",
+      "customer": "David Lee",
+      "items": 2,
+      "amount": 89.0,
+      "status": "Delivered",
+      "date": "2026-04-18"
+    },
+    {
+      "id": "ORD-0037",
+      "customer": "Eva Chen",
+      "items": 4,
+      "amount": 204.0,
+      "status": "Cancelled",
+      "date": "2026-04-17"
+    },
+    {
+      "id": "ORD-0036",
+      "customer": "Frank Weber",
+      "items": 2,
+      "amount": 178.0,
+      "status": "Delivered",
+      "date": "2026-04-16"
+    },
+    {
+      "id": "ORD-0035",
+      "customer": "Greta Müller",
+      "items": 1,
+      "amount": 49.0,
+      "status": "Shipped",
+      "date": "2026-04-15"
+    },
+    {
+      "id": "ORD-0034",
+      "customer": "Hans Schmidt",
+      "items": 3,
+      "amount": 297.0,
+      "status": "Delivered",
+      "date": "2026-04-14"
+    }
+  ],
+  "invoices": [
+    {
+      "id": "INV-2026-011",
+      "client": "Acme Corp",
+      "issued": "2026-04-01",
+      "due": "2026-04-15",
+      "amount": 3200.0,
+      "status": "paid"
+    },
+    {
+      "id": "INV-2026-012",
+      "client": "Globex Ltd",
+      "issued": "2026-04-05",
+      "due": "2026-04-20",
+      "amount": 1750.0,
+      "status": "paid"
+    },
+    {
+      "id": "INV-2026-013",
+      "client": "Initech Inc",
+      "issued": "2026-04-10",
+      "due": "2026-04-24",
+      "amount": 5600.0,
+      "status": "pending"
+    },
+    {
+      "id": "INV-2026-014",
+      "client": "Umbrella Co",
+      "issued": "2026-03-28",
+      "due": "2026-04-11",
+      "amount": 920.0,
+      "status": "overdue"
+    },
+    {
+      "id": "INV-2026-015",
+      "client": "Stark Industries",
+      "issued": "2026-04-12",
+      "due": "2026-04-26",
+      "amount": 8400.0,
+      "status": "pending"
+    },
+    {
+      "id": "INV-2026-016",
+      "client": "Wayne Enterprises",
+      "issued": "2026-04-02",
+      "due": "2026-04-16",
+      "amount": 12500.0,
+      "status": "paid"
+    },
+    {
+      "id": "INV-2026-017",
+      "client": "Cyberdyne Systems",
+      "issued": "2026-03-20",
+      "due": "2026-04-03",
+      "amount": 2100.0,
+      "status": "overdue"
+    },
+    {
+      "id": "INV-2026-018",
+      "client": "Tyrell Corp",
+      "issued": "2026-04-15",
+      "due": "2026-04-29",
+      "amount": 4750.0,
+      "status": "pending"
+    },
+    {
+      "id": "INV-2026-019",
+      "client": "Wonka Industries",
+      "issued": "2026-04-08",
+      "due": "2026-04-22",
+      "amount": 680.0,
+      "status": "paid"
+    },
+    {
+      "id": "INV-2026-020",
+      "client": "Pied Piper",
+      "issued": "2026-04-18",
+      "due": "2026-05-02",
+      "amount": 1980.0,
+      "status": "pending"
+    }
+  ]
 }

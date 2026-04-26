@@ -1,87 +1,111 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { catchError, of, tap } from 'rxjs';
+import { BACKEND_CONFIG, LoggerService } from '@angular-monorepo-template/core';
+
+export type OrderStatus = 'Pending' | 'Shipped' | 'Delivered' | 'Cancelled';
 
 export interface Order {
   id: string;
   customer: string;
   items: number;
-  amount: string;
-  status: string;
-  badgeClass: string;
+  amount: number;
+  status: OrderStatus;
   date: string;
 }
 
-const INITIAL_ORDERS: Order[] = [
-  {
-    id: '#ORD-0041',
-    customer: 'Alice Johnson',
-    items: 3,
-    amount: '$149.00',
-    status: 'Delivered',
-    badgeClass: 'badge--success',
-    date: 'Apr 21, 2026',
-  },
-  {
-    id: '#ORD-0040',
-    customer: 'Bob Martinez',
-    items: 1,
-    amount: '$59.99',
-    status: 'Shipped',
-    badgeClass: 'badge--info',
-    date: 'Apr 20, 2026',
-  },
-  {
-    id: '#ORD-0039',
-    customer: 'Carol Smith',
-    items: 5,
-    amount: '$312.50',
-    status: 'Pending',
-    badgeClass: 'badge--warning',
-    date: 'Apr 19, 2026',
-  },
-  {
-    id: '#ORD-0038',
-    customer: 'David Lee',
-    items: 2,
-    amount: '$89.00',
-    status: 'Delivered',
-    badgeClass: 'badge--success',
-    date: 'Apr 18, 2026',
-  },
-  {
-    id: '#ORD-0037',
-    customer: 'Eva Chen',
-    items: 4,
-    amount: '$204.00',
-    status: 'Cancelled',
-    badgeClass: 'badge--danger',
-    date: 'Apr 17, 2026',
-  },
-];
+export interface OrderView extends Order {
+  amountDisplay: string;
+  dateDisplay: string;
+  badgeClass: string;
+}
+
+const STATUS_BADGE: Record<OrderStatus, string> = {
+  Delivered: 'badge--success',
+  Shipped: 'badge--info',
+  Pending: 'badge--warning',
+  Cancelled: 'badge--danger',
+};
+
+const CURRENCY = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+});
+const DATE = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+});
 
 @Injectable({ providedIn: 'root' })
 export class OrdersService {
-  private nextOrderNum = 42;
+  private http = inject(HttpClient);
+  private config = inject(BACKEND_CONFIG);
+  private logger = inject(LoggerService);
 
-  readonly orders = signal<Order[]>(INITIAL_ORDERS);
+  private raw = signal<Order[]>([]);
+  readonly loading = signal(false);
+  readonly error = signal<string | null>(null);
 
-  addOrder(customer: string, items: number, amount: string): void {
-    const num = this.nextOrderNum++;
-    const date = new Date().toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-    this.orders.update((list) => [
-      {
-        id: `#ORD-${String(num).padStart(4, '0')}`,
-        customer,
-        items,
-        amount,
-        status: 'Pending',
-        badgeClass: 'badge--warning',
-        date,
-      },
-      ...list,
-    ]);
+  readonly orders = computed<OrderView[]>(() =>
+    this.raw().map((o) => ({
+      ...o,
+      amountDisplay: CURRENCY.format(o.amount),
+      dateDisplay: DATE.format(new Date(o.date)),
+      badgeClass: STATUS_BADGE[o.status] ?? 'badge--info',
+    })),
+  );
+
+  loadOrders() {
+    this.loading.set(true);
+    this.error.set(null);
+    return this.http.get<Order[]>(this.config.rest.ordersUrl).pipe(
+      tap((list) => {
+        this.raw.set(this.sortNewestFirst(list));
+        this.logger.info('Orders loaded', list.length);
+        this.loading.set(false);
+      }),
+      catchError((err) => {
+        this.logger.error('Failed to load orders', err);
+        this.error.set('Could not load orders.');
+        this.loading.set(false);
+        return of([] as Order[]);
+      }),
+    );
+  }
+
+  addOrder(input: { customer: string; items: number; amount: number }) {
+    const id = this.nextOrderId();
+    const newOrder: Order = {
+      id,
+      customer: input.customer,
+      items: input.items,
+      amount: input.amount,
+      status: 'Pending',
+      date: new Date().toISOString().slice(0, 10),
+    };
+    return this.http.post<Order>(this.config.rest.ordersUrl, newOrder).pipe(
+      tap((saved) => {
+        this.raw.update((list) => this.sortNewestFirst([saved, ...list]));
+        this.logger.info('Order created', saved.id);
+      }),
+      catchError((err) => {
+        this.logger.error('Failed to create order', err);
+        this.error.set('Could not save order. Please try again.');
+        return of(null);
+      }),
+    );
+  }
+
+  private nextOrderId(): string {
+    const max = this.raw().reduce((acc, o) => {
+      const n = Number(o.id.replace(/\D/g, ''));
+      return Number.isFinite(n) && n > acc ? n : acc;
+    }, 0);
+    return `ORD-${String(max + 1).padStart(4, '0')}`;
+  }
+
+  private sortNewestFirst(list: Order[]): Order[] {
+    return [...list].sort((a, b) => (a.date < b.date ? 1 : -1));
   }
 }
