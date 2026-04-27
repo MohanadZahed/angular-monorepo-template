@@ -6,7 +6,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { UiAlertComponent } from '@angular-monorepo-template/core';
-import { StatisticsService } from './statistics.service';
+import { StatisticsStore } from './statistics.store';
 
 interface ChartBar {
   date: string;
@@ -32,14 +32,14 @@ const DATE_LABEL = new Intl.DateTimeFormat('en-US', {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Statistics implements OnInit {
-  private service = inject(StatisticsService);
+  private store = inject(StatisticsStore);
 
-  readonly loading = this.service.loading;
-  readonly error = this.service.error;
-  readonly totalOrders = this.service.totalOrders;
-  readonly totalRevenueDisplay = this.service.totalRevenueDisplay;
-  readonly avgOrderValueDisplay = this.service.avgOrderValueDisplay;
-  readonly statusBreakdown = this.service.statusBreakdown;
+  readonly loading = this.store.loading;
+  readonly error = this.store.error;
+  readonly totalOrders = this.store.totalOrders;
+  readonly totalRevenueDisplay = this.store.totalRevenueDisplay;
+  readonly avgOrderValueDisplay = this.store.avgOrderValueDisplay;
+  readonly statusBreakdown = this.store.statusBreakdown;
 
   readonly chartHeight = CHART_HEIGHT;
   readonly chartViewBox = computed(() => {
@@ -48,17 +48,17 @@ export class Statistics implements OnInit {
   });
 
   readonly chartWidth = computed(() => {
-    const bars = this.service.dailyTotals().length;
+    const bars = this.store.dailyTotals().length;
     if (bars === 0) return 320;
     return Math.max(320, bars * 56 + CHART_PADDING * 2);
   });
 
   readonly maxDaily = computed(() =>
-    this.service.dailyTotals().reduce((m, d) => Math.max(m, d.total), 0),
+    this.store.dailyTotals().reduce((m, d) => Math.max(m, d.total), 0),
   );
 
   readonly bars = computed<ChartBar[]>(() => {
-    const data = this.service.dailyTotals();
+    const data = this.store.dailyTotals();
     if (data.length === 0) return [];
     const max = this.maxDaily() || 1;
     const usableWidth = this.chartWidth() - CHART_PADDING * 2;
@@ -77,14 +77,14 @@ export class Statistics implements OnInit {
   });
 
   readonly chartSummary = computed(() => {
-    const data = this.service.dailyTotals();
+    const data = this.store.dailyTotals();
     if (data.length === 0) return 'No order history available.';
     const top = data.reduce((a, b) => (a.total > b.total ? a : b));
     return `${data.length} days of order revenue, peak ${this.formatLabel(top.date)} at $${top.total.toFixed(0)}.`;
   });
 
   ngOnInit(): void {
-    this.service.load().subscribe();
+    this.store.load();
   }
 
   formatLabel(date: string): string {

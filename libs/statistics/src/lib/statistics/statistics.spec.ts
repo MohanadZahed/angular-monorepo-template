@@ -4,8 +4,12 @@ import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
-import { BACKEND_CONFIG, BackendConfig } from '@angular-monorepo-template/core';
-import { StatisticsService } from './statistics.service';
+import {
+  BACKEND_CONFIG,
+  BackendConfig,
+  OrdersDataStore,
+} from '@angular-monorepo-template/core';
+import { StatisticsStore } from './statistics.store';
 
 const TEST_CONFIG: BackendConfig = {
   production: false,
@@ -43,8 +47,9 @@ const FIXTURE = [
   },
 ];
 
-describe('StatisticsService', () => {
-  let service: StatisticsService;
+describe('StatisticsStore', () => {
+  let store: InstanceType<typeof StatisticsStore>;
+  let dataStore: InstanceType<typeof OrdersDataStore>;
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
@@ -55,42 +60,70 @@ describe('StatisticsService', () => {
         { provide: BACKEND_CONFIG, useValue: TEST_CONFIG },
       ],
     });
-    service = TestBed.inject(StatisticsService);
+    store = TestBed.inject(StatisticsStore);
+    dataStore = TestBed.inject(OrdersDataStore);
     httpMock = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => httpMock.verify());
 
   it('hydrates and computes KPIs from order data', () => {
-    service.load().subscribe();
+    store.load();
     httpMock.expectOne(TEST_CONFIG.rest.ordersUrl).flush(FIXTURE);
 
-    expect(service.totalOrders()).toBe(3);
-    expect(service.totalRevenue()).toBe(300);
-    expect(service.avgOrderValue()).toBe(150);
+    expect(store.totalOrders()).toBe(3);
+    expect(store.totalRevenue()).toBe(300);
+    expect(store.avgOrderValue()).toBe(150);
   });
 
   it('groups daily totals excluding cancelled orders', () => {
-    service.load().subscribe();
+    store.load();
     httpMock.expectOne(TEST_CONFIG.rest.ordersUrl).flush(FIXTURE);
 
-    const daily = service.dailyTotals();
-    expect(daily).toEqual([
+    expect(store.dailyTotals()).toEqual([
       { date: '2026-04-01', total: 100 },
       { date: '2026-04-02', total: 200 },
     ]);
   });
 
   it('produces a status breakdown sorted by count', () => {
-    service.load().subscribe();
+    store.load();
     httpMock.expectOne(TEST_CONFIG.rest.ordersUrl).flush(FIXTURE);
 
-    const breakdown = service.statusBreakdown();
+    const breakdown = store.statusBreakdown();
     expect(breakdown.map((b) => b.status)).toEqual([
       'Delivered',
       'Shipped',
       'Cancelled',
     ]);
     expect(breakdown.every((b) => b.count === 1)).toBe(true);
+  });
+
+  it('caches across load() calls and refetches on reload()', () => {
+    store.load();
+    httpMock.expectOne(TEST_CONFIG.rest.ordersUrl).flush(FIXTURE);
+
+    store.load();
+    httpMock.expectNone(TEST_CONFIG.rest.ordersUrl);
+
+    store.reload();
+    httpMock.expectOne(TEST_CONFIG.rest.ordersUrl).flush(FIXTURE);
+  });
+
+  it('reflects new orders added via OrdersDataStore.setOrders()', () => {
+    store.load();
+    httpMock.expectOne(TEST_CONFIG.rest.ordersUrl).flush(FIXTURE);
+
+    const newOrder = {
+      id: 'D',
+      customer: 'W',
+      items: 1,
+      amount: 50,
+      status: 'Pending',
+      date: '2026-04-03',
+    };
+    dataStore.setOrders([newOrder, ...FIXTURE]);
+
+    expect(store.totalOrders()).toBe(4);
   });
 });

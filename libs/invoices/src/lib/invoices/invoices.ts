@@ -7,7 +7,8 @@ import {
   signal,
 } from '@angular/core';
 import { UiAlertComponent } from '@angular-monorepo-template/core';
-import { Invoice, InvoiceStatus, InvoicesService } from './invoices.service';
+import { Invoice, InvoiceStatus } from './invoices.service';
+import { InvoicesStore } from './invoices.store';
 
 type StatusFilter = 'all' | InvoiceStatus;
 type SortKey = 'amount' | 'due';
@@ -46,10 +47,10 @@ interface InvoiceRow extends Invoice {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Invoices implements OnInit {
-  private service = inject(InvoicesService);
+  private store = inject(InvoicesStore);
 
-  readonly loading = this.service.loading;
-  readonly error = this.service.error;
+  readonly loading = this.store.loading;
+  readonly error = this.store.error;
 
   readonly statusFilter = signal<StatusFilter>('all');
   readonly sortKey = signal<SortKey>('due');
@@ -65,7 +66,7 @@ export class Invoices implements OnInit {
 
   readonly filtered = computed<Invoice[]>(() => {
     const status = this.statusFilter();
-    const list = this.service.invoices();
+    const list = this.store.invoices();
     return status === 'all' ? list : list.filter((i) => i.status === status);
   });
 
@@ -109,7 +110,7 @@ export class Invoices implements OnInit {
   });
 
   ngOnInit(): void {
-    this.service.load().subscribe();
+    this.store.load();
   }
 
   onFilterChange(value: string) {

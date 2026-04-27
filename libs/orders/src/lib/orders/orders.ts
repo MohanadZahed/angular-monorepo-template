@@ -12,7 +12,7 @@ import {
   UiButtonComponent,
   UiAlertComponent,
 } from '@angular-monorepo-template/core';
-import { OrdersService } from './orders.service';
+import { OrdersStore } from './orders.store';
 
 const PRODUCTS = [
   { value: 'basic', label: 'Basic Package — $49/mo', price: 49 },
@@ -30,7 +30,7 @@ const PRODUCTS = [
 })
 export class Orders implements OnInit, HasUnsavedChanges {
   private fb = inject(FormBuilder);
-  private ordersService = inject(OrdersService);
+  private store = inject(OrdersStore);
 
   readonly products = PRODUCTS;
   readonly steps = [
@@ -39,9 +39,9 @@ export class Orders implements OnInit, HasUnsavedChanges {
     { n: 3, label: 'Review' },
   ];
 
-  readonly orders = this.ordersService.orders;
-  readonly loading = this.ordersService.loading;
-  readonly loadError = this.ordersService.error;
+  readonly orders = this.store.orders;
+  readonly loading = this.store.loading;
+  readonly loadError = this.store.error;
 
   showForm = signal(false);
   submitted = signal(false);
@@ -96,7 +96,7 @@ export class Orders implements OnInit, HasUnsavedChanges {
   );
 
   ngOnInit(): void {
-    this.ordersService.loadOrders().subscribe();
+    this.store.load();
   }
 
   hasUnsavedChanges(): boolean {
@@ -139,7 +139,7 @@ export class Orders implements OnInit, HasUnsavedChanges {
     const amount = productObj ? productObj.price * details.quantity : 0;
 
     this.submitting.set(true);
-    this.ordersService
+    this.store
       .addOrder({
         customer: `${customer.firstName} ${customer.lastName}`,
         items: details.quantity,
