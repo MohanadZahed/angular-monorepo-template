@@ -16,6 +16,40 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint"
+    },
+    "storybook": {
+      "executor": "@storybook/angular:start-storybook",
+      "options": {
+        "configDir": "libs/core/.storybook",
+        "browserTarget": "core:storybook-build-context",
+        "tsConfig": "libs/core/.storybook/tsconfig.json",
+        "compodoc": false,
+        "port": 4400,
+        "styles": ["libs/core/src/lib/styles/global.scss"]
+      }
+    },
+    "build-storybook": {
+      "executor": "@storybook/angular:build-storybook",
+      "outputs": ["{options.outputDir}"],
+      "options": {
+        "configDir": "libs/core/.storybook",
+        "browserTarget": "core:storybook-build-context",
+        "tsConfig": "libs/core/.storybook/tsconfig.json",
+        "outputDir": "libs/core/storybook-static",
+        "compodoc": false,
+        "styles": ["libs/core/src/lib/styles/global.scss"]
+      }
+    },
+    "storybook-build-context": {
+      "executor": "@angular-devkit/build-angular:browser",
+      "options": {
+        "outputPath": "dist/libs/core/storybook-context",
+        "index": "libs/core/.storybook/index.html",
+        "main": "libs/core/.storybook/main.ts",
+        "tsConfig": "libs/core/.storybook/tsconfig.json",
+        "inlineStyleLanguage": "scss",
+        "styles": ["libs/core/src/lib/styles/global.scss"]
+      }
     }
   }
 }

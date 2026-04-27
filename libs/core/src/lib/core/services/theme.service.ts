@@ -20,9 +20,11 @@ export class ThemeService {
   private document = inject(DOCUMENT);
   private isBrowser = isPlatformBrowser(this.platformId);
 
-  private mediaQuery = this.isBrowser
-    ? this.document.defaultView?.matchMedia('(prefers-color-scheme: dark)')
-    : undefined;
+  private mediaQuery =
+    this.isBrowser &&
+    typeof this.document.defaultView?.matchMedia === 'function'
+      ? this.document.defaultView.matchMedia('(prefers-color-scheme: dark)')
+      : undefined;
 
   private systemPrefersDark = signal(this.mediaQuery?.matches ?? false);
   readonly preference = signal<ThemePreference>(this.readStoredPreference());
