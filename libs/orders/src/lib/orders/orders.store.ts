@@ -45,7 +45,9 @@ export const OrdersStore = signalStore(
         return svc.addOrder(input, ds.data() ?? []).pipe(
           tap((saved) => {
             if (!saved) return;
-            ds.setOrders(svc.sortNewestFirst([saved, ...(ds.data() ?? [])]));
+            const current = ds.data() ?? [];
+            if (current.some((o) => o.id === saved.id)) return;
+            ds.setOrders(svc.sortNewestFirst([saved, ...current]));
           }),
         );
       },

@@ -68,22 +68,6 @@
       "amount": 297,
       "status": "Delivered",
       "date": "2026-04-14"
-    },
-    {
-      "id": "ORD-0042",
-      "customer": "dfg dfg",
-      "items": 1,
-      "amount": 99,
-      "status": "Pending",
-      "date": "2026-04-27"
-    },
-    {
-      "id": "ORD-0043",
-      "customer": "fdg dfgddfgd",
-      "items": 1,
-      "amount": 199,
-      "status": "Pending",
-      "date": "2026-04-27"
     }
   ],
   "invoices": [
