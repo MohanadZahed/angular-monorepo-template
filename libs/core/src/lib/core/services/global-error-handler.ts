@@ -7,7 +7,7 @@ export class GlobalErrorHandler implements ErrorHandler {
 
   handleError(error: unknown): void {
     const payload = this.normalize(error);
-    this.logger.error('Uncaught error', payload);
+    this.logger.error('Uncaught error', payload as Record<string, unknown>);
   }
 
   private normalize(error: unknown): Record<string, unknown> {

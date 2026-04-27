@@ -8,6 +8,7 @@ export const backendConfig: BackendConfig = {
     featureFlagsUrl: environment.featureFlagsUrl,
     ordersUrl: environment.ordersUrl,
     invoicesUrl: environment.invoicesUrl,
+    logsUrl: environment.logsUrl,
     wsUrl: environment.wsUrl,
     endpoints: {},
   },

@@ -23,6 +23,10 @@ export class InvoicesService {
   load(): Observable<Invoice[]> {
     return this.http
       .get<Invoice[]>(this.config.rest.invoicesUrl)
-      .pipe(tap((list) => this.logger.info('Invoices loaded', list.length)));
+      .pipe(
+        tap((list) =>
+          this.logger.info('Invoices loaded', { count: list.length }),
+        ),
+      );
   }
 }

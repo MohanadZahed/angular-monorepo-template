@@ -14,6 +14,7 @@ import {
 import {
   FeatureFlagService,
   GlobalErrorHandler,
+  TraceService,
   WebVitalsService,
 } from '@angular-monorepo-template/core';
 import {
@@ -40,6 +41,7 @@ export const appConfig: ApplicationConfig = {
       const featureFlagService = inject(FeatureFlagService);
       return featureFlagService.loadFlags();
     }),
+    provideAppInitializer(() => inject(TraceService).init()),
     provideAppInitializer(() => inject(WebVitalsService).start()),
     backendConfigProvider,
     { provide: ErrorHandler, useClass: GlobalErrorHandler },

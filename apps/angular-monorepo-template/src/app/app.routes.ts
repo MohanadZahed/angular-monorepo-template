@@ -47,7 +47,7 @@ export const appRoutes: Routes = [
     path: 'admin/feature-flags',
     canActivate: [isAdmin],
     loadComponent: () =>
-      import('@angular-monorepo-template/core').then(
+      import('@angular-monorepo-template/admin').then(
         (m) => m.AdminFeatureFlags,
       ),
   },

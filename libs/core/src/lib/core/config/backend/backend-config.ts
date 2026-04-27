@@ -4,6 +4,7 @@ export interface BackendConfig {
     featureFlagsUrl: string;
     ordersUrl: string;
     invoicesUrl: string;
+    logsUrl?: string;
     wsUrl?: string;
     prefix?: string;
     /**

@@ -8,10 +8,10 @@ import {
 import {
   FeatureFlagMap,
   FeatureFlagService,
-} from '../../core/services/feature-flag.service';
-import { UiButtonComponent } from '../ui/button/ui-button';
-import { UiCardComponent } from '../ui/card/ui-card';
-import { UiAlertComponent } from '../ui/alert/ui-alert';
+  UiAlertComponent,
+  UiButtonComponent,
+  UiCardComponent,
+} from '@angular-monorepo-template/core';
 
 @Component({
   selector: 'lib-admin-feature-flags',

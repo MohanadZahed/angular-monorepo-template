@@ -27,13 +27,12 @@ export class FeatureFlagService {
   readonly flags = this._flags.asReadonly();
 
   loadFlags() {
-    this.logger.debug(
-      'Loading feature flags from',
-      this.config.rest.featureFlagsUrl,
-    );
+    this.logger.debug('Loading feature flags', {
+      url: this.config.rest.featureFlagsUrl,
+    });
     return this.http.get<FeatureFlagMap>(this.config.rest.featureFlagsUrl).pipe(
       tap((response) => {
-        this.logger.info('Feature flags loaded', response);
+        this.logger.info('Feature flags loaded', { flags: response });
         this._flags.set(response);
       }),
       catchError(() => {
@@ -49,7 +48,7 @@ export class FeatureFlagService {
       .put<FeatureFlagMap>(this.config.rest.featureFlagsUrl, flags)
       .pipe(
         tap((response) => {
-          this.logger.info('Feature flags saved', response);
+          this.logger.info('Feature flags saved', { flags: response });
           this._flags.set(response ?? flags);
         }),
       );

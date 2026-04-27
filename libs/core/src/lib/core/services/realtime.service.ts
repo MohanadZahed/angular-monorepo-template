@@ -64,7 +64,7 @@ export class RealtimeService implements OnDestroy {
 
       socket.addEventListener('open', () => {
         this.connected.set(true);
-        this.logger.info('Realtime connected', url);
+        this.logger.info('Realtime connected', { url });
       });
 
       socket.addEventListener('message', (ev) => {
@@ -72,7 +72,7 @@ export class RealtimeService implements OnDestroy {
           const data = JSON.parse(ev.data) as RealtimeEvent;
           this.events$.next(data);
         } catch (err) {
-          this.logger.error('Realtime parse failed', err);
+          this.logger.error('Realtime parse failed', { error: String(err) });
         }
       });
 
@@ -86,7 +86,7 @@ export class RealtimeService implements OnDestroy {
         this.logger.warn('Realtime socket error');
       });
     } catch (err) {
-      this.logger.error('Realtime connect failed', err);
+      this.logger.error('Realtime connect failed', { error: String(err) });
       this.scheduleReconnect();
     }
   }

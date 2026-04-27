@@ -56,7 +56,11 @@ export class OrdersService {
   loadOrders(): Observable<Order[]> {
     return this.http
       .get<Order[]>(this.config.rest.ordersUrl)
-      .pipe(tap((list) => this.logger.info('Orders loaded', list.length)));
+      .pipe(
+        tap((list) =>
+          this.logger.info('Orders loaded', { count: list.length }),
+        ),
+      );
   }
 
   addOrder(
@@ -72,9 +76,9 @@ export class OrdersService {
       date: new Date().toISOString().slice(0, 10),
     };
     return this.http.post<Order>(this.config.rest.ordersUrl, newOrder).pipe(
-      tap((saved) => this.logger.info('Order created', saved.id)),
+      tap((saved) => this.logger.info('Order created', { id: saved.id })),
       catchError((err) => {
-        this.logger.error('Failed to create order', err);
+        this.logger.error('Failed to create order', { error: String(err) });
         return of(null);
       }),
     );

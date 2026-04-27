@@ -12,6 +12,31 @@ const middlewares = jsonServer.defaults();
 app.use(middlewares);
 app.use(jsonServer.bodyParser);
 
+const logStore = [];
+const MAX_LOGS = 1000;
+
+app.post('/logs', (req, res) => {
+  const batch = Array.isArray(req.body) ? req.body : [req.body];
+  for (const entry of batch) {
+    console.log(
+      `[client-log] level=${entry.level} traceId=${entry.traceId} msg="${entry.message}"`,
+      entry.context ?? '',
+    );
+    logStore.push(entry);
+  }
+  if (logStore.length > MAX_LOGS)
+    logStore.splice(0, logStore.length - MAX_LOGS);
+  res.status(204).end();
+});
+
+app.get('/logs', (req, res) => {
+  const { traceId, level } = req.query;
+  let result = logStore;
+  if (traceId) result = result.filter((e) => e.traceId === traceId);
+  if (level) result = result.filter((e) => e.level === level);
+  res.json(result);
+});
+
 const WRITE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 const ORDER_EVENT_BY_METHOD = {
   POST: 'order:created',

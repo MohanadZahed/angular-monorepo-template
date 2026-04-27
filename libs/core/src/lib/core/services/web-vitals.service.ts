@@ -26,13 +26,16 @@ export class WebVitalsService {
       onFCP((m) => this.report(m));
       onTTFB((m) => this.report(m));
     } catch (err) {
-      this.logger.warn('web-vitals failed to load', err);
+      this.logger.warn('web-vitals failed to load', { error: String(err) });
     }
   }
 
   private report(metric: VitalMetric): void {
-    this.logger.info(
-      `vital ${metric.name}=${metric.value.toFixed(2)} (${metric.rating})`,
-    );
+    this.logger.info('web-vital', {
+      name: metric.name,
+      value: Number(metric.value.toFixed(2)),
+      rating: metric.rating,
+      id: metric.id,
+    });
   }
 }
