@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   inject,
   signal,
@@ -8,6 +9,7 @@ import {
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { UserAuthService } from '../../core/services/user-auth.service';
 import { FeatureFlagService } from '../../core/services/feature-flag.service';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'lib-app-header',
@@ -18,6 +20,7 @@ import { FeatureFlagService } from '../../core/services/feature-flag.service';
 export class AppHeader {
   private authService = inject(UserAuthService);
   private featureFlagService = inject(FeatureFlagService);
+  private themeService = inject(ThemeService);
   private router = inject(Router);
 
   isLoggedIn = this.authService.isLoggedIn;
@@ -27,6 +30,12 @@ export class AppHeader {
   showStatistics = this.featureFlagService.isEnabled('statistics');
   showInvoices = this.featureFlagService.isEnabled('invoices');
   showOrders = this.featureFlagService.isEnabled('orders');
+
+  resolvedTheme = this.themeService.resolved;
+  isDark = computed(() => this.resolvedTheme() === 'dark');
+  themeToggleLabel = computed(() =>
+    this.isDark() ? 'Switch to light theme' : 'Switch to dark theme',
+  );
 
   readonly authAnnouncement = signal('');
 
@@ -42,6 +51,10 @@ export class AppHeader {
       }
       ready = true;
     });
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggle();
   }
 
   logout() {

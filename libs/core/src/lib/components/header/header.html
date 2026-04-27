@@ -15,12 +15,24 @@
     >
     }
   </nav>
+  }
+
   <div class="app-header-actions">
+    <button
+      class="btn--theme-toggle"
+      type="button"
+      [attr.aria-label]="themeToggleLabel()"
+      [attr.aria-pressed]="isDark()"
+      (click)="toggleTheme()"
+    >
+      <span aria-hidden="true">{{ isDark() ? '☾' : '☀' }}</span>
+    </button>
+    @if (isLoggedIn()) {
     <button class="btn btn--logout" type="button" (click)="logout()">
       Logout
     </button>
+    }
   </div>
-  }
 </header>
 
 <div class="sr-only" aria-live="polite" aria-atomic="true">

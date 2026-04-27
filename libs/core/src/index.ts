@@ -4,6 +4,7 @@ export * from './lib/core/services/user-auth.service';
 export * from './lib/core/services/global-error-handler';
 export * from './lib/core/services/web-vitals.service';
 export * from './lib/core/services/realtime.service';
+export * from './lib/core/services/theme.service';
 export * from './lib/core/interceptors/auth.interceptor';
 export * from './lib/core/interceptors/error.interceptor';
 export * from './lib/core/guards/feature-flag.guard';

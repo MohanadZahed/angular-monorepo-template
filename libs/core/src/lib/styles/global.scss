@@ -1,47 +1,45 @@
 /* =============================================================
    Design Tokens
+   See ./tokens/* for the source of truth.
    ============================================================= */
+@use './tokens/colors';
+@use './tokens/spacing';
+@use './tokens/typography';
+
+/* Legacy aliases — kept so existing rules (and external apps) keep working
+   while the codebase migrates to --ds-* tokens. New code must use --ds-*. */
 :root {
-  --color-primary: hsla(214, 62%, 21%, 1);
-  --color-accent: hsla(162, 47%, 50%, 1);
-  --color-accent-dark: hsla(162, 55%, 33%, 1);
-  --color-text: rgba(55, 65, 81, 1);
-  --color-text-muted: rgba(107, 114, 128, 1);
-  --color-text-light: rgba(229, 231, 235, 1);
-  --color-bg: rgba(249, 250, 251, 1);
-  --color-bg-light: rgba(243, 244, 246, 1);
-  --color-white: rgba(255, 255, 255, 1);
-  --color-border: rgba(229, 231, 235, 1);
+  --color-primary: var(--ds-color-primary);
+  --color-accent: var(--ds-color-accent);
+  --color-accent-dark: var(--ds-color-accent-strong);
+  --color-text: var(--ds-color-text);
+  --color-text-muted: var(--ds-color-text-muted);
+  --color-text-light: var(--ds-color-text-inverse);
+  --color-bg: var(--ds-color-bg);
+  --color-bg-light: var(--ds-color-bg-subtle);
+  --color-white: var(--ds-color-surface);
+  --color-border: var(--ds-color-border);
 
-  --color-success: hsla(142, 71%, 38%, 1);
-  --color-success-bg: hsla(142, 76%, 95%, 1);
-  --color-warning: hsla(38, 92%, 50%, 1);
-  --color-warning-bg: hsla(48, 100%, 95%, 1);
-  --color-danger: hsla(0, 72%, 51%, 1);
-  --color-danger-bg: hsla(0, 100%, 97%, 1);
-  --color-info: rgba(0, 122, 204, 1);
-  --color-info-bg: hsla(207, 100%, 95%, 1);
+  --color-success: var(--ds-color-success);
+  --color-success-bg: var(--ds-color-success-bg);
+  --color-warning: var(--ds-color-warning);
+  --color-warning-bg: var(--ds-color-warning-bg);
+  --color-danger: var(--ds-color-danger);
+  --color-danger-bg: var(--ds-color-danger-bg);
+  --color-info: var(--ds-color-info);
+  --color-info-bg: var(--ds-color-info-bg);
 
-  --radius-sm: 0.375rem;
-  --radius: 0.75rem;
-  --radius-lg: 1.5rem;
+  --radius-sm: var(--ds-radius-sm);
+  --radius: var(--ds-radius-md);
+  --radius-lg: var(--ds-radius-lg);
 
-  --shadow:
-    0 0 #0000, 0 0 #0000, 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow: var(--ds-shadow-md);
 
-  --font-sans:
-    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif,
-    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  --font-mono:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
-    'Courier New', monospace;
+  --font-sans: var(--ds-font-family-sans);
+  --font-mono: var(--ds-font-family-mono);
 
-  --transition-props:
-    background-color, border-color, color, fill, stroke, opacity, box-shadow,
-    transform, filter, backdrop-filter, -webkit-backdrop-filter;
-  --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-props: var(--ds-motion-properties);
+  --transition-timing: var(--ds-motion-easing);
 }
 
 /* =============================================================
@@ -824,6 +822,29 @@ summary svg {
 .app-header-actions {
   display: flex;
   align-items: center;
+  gap: var(--ds-space-2);
+}
+
+.btn--theme-toggle {
+  background: transparent;
+  border: 1px solid var(--ds-overlay-on-primary-strong);
+  color: var(--ds-color-text-on-primary);
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ds-radius-pill);
+  font-size: var(--ds-font-size-lg);
+  line-height: 1;
+  cursor: pointer;
+  transition-property: var(--ds-motion-properties);
+  transition-timing-function: var(--ds-motion-easing);
+  transition-duration: var(--ds-motion-duration-fast);
+}
+
+.btn--theme-toggle:hover {
+  background: var(--ds-overlay-on-primary-soft);
 }
 
 .btn--logout {

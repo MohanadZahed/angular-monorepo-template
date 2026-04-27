@@ -47,55 +47,56 @@ const ICONS: Record<AlertType, string> = {
     .ui-alert {
       display: flex;
       align-items: flex-start;
-      gap: 0.75rem;
-      padding: 0.875rem 1rem;
-      border-radius: var(--radius-sm);
+      gap: var(--ds-space-3);
+      padding: var(--ds-space-3) var(--ds-space-4);
+      border-radius: var(--ds-radius-sm);
       border-left: 4px solid transparent;
-      font-size: 0.9375rem;
+      font-size: var(--ds-font-size-base);
+      line-height: var(--ds-line-height-normal);
     }
 
     .ui-alert--success {
-      background-color: var(--color-success-bg);
-      border-color: var(--color-success);
-      color: var(--color-success);
+      background-color: var(--ds-color-success-bg);
+      border-color: var(--ds-color-success);
+      color: var(--ds-color-success);
     }
 
     .ui-alert--error {
-      background-color: var(--color-danger-bg);
-      border-color: var(--color-danger);
-      color: var(--color-danger);
+      background-color: var(--ds-color-danger-bg);
+      border-color: var(--ds-color-danger);
+      color: var(--ds-color-danger);
     }
 
     .ui-alert--warning {
-      background-color: var(--color-warning-bg);
-      border-color: var(--color-warning);
-      color: var(--color-warning);
+      background-color: var(--ds-color-warning-bg);
+      border-color: var(--ds-color-warning);
+      color: var(--ds-color-warning);
     }
 
     .ui-alert--info {
-      background-color: var(--color-info-bg);
-      border-color: var(--color-info);
-      color: var(--color-info);
+      background-color: var(--ds-color-info-bg);
+      border-color: var(--ds-color-info);
+      color: var(--ds-color-info);
     }
 
     .ui-alert-icon {
-      font-weight: 700;
+      font-weight: var(--ds-font-weight-bold);
       flex-shrink: 0;
-      line-height: 1.5;
+      line-height: var(--ds-line-height-normal);
     }
 
     .ui-alert-body {
       flex: 1;
-      color: var(--color-text);
-      line-height: 1.5;
+      color: var(--ds-color-text);
+      line-height: var(--ds-line-height-normal);
     }
 
     .ui-alert-dismiss {
       background: none;
       border: none;
       cursor: pointer;
-      padding: 0 0.25rem;
-      font-size: 1.25rem;
+      padding: 0 var(--ds-space-1);
+      font-size: var(--ds-font-size-2xl);
       line-height: 1;
       color: inherit;
       opacity: 0.6;
