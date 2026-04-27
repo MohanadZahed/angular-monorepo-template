@@ -1,470 +1,333 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FeatureFlagService } from '@angular-monorepo-template/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+} from '@angular/core';
+import {
+  FeatureFlagService,
+  I18nService,
+  Locale,
+  TranslatePipe,
+} from '@angular-monorepo-template/core';
+
+interface Section {
+  id: string;
+  titleKey: string;
+  items: string[];
+}
+
+const SECTIONS: Record<Locale, Section[]> = {
+  en: [
+    {
+      id: 'architecture',
+      titleKey: 'home.section.architecture',
+      items: [
+        'Nx 22 monorepo with apps (host, login) and libs (core, orders, invoices, statistics, admin)',
+        'ESLint @nx/enforce-module-boundaries — tags: type:app, type:lib, scope:shared, scope:feature',
+        'Feature libs may only depend on scope:shared; libs never import from apps',
+        'Strict public APIs: every lib exports through libs/<name>/src/index.ts (no deep imports)',
+        'Module Federation (webpack): host angular-monorepo-template consumes the login remote',
+      ],
+    },
+    {
+      id: 'rendering',
+      titleKey: 'home.section.rendering',
+      items: [
+        'Angular 21 standalone components everywhere; ChangeDetectionStrategy.OnPush by default',
+        'Server-Side Rendering via @angular/ssr (provideServerRendering(withRoutes(...)))',
+        'Client hydration with event replay — provideClientHydration(withEventReplay())',
+        'Lazy-loaded feature routes via loadComponent; remote routes via loadChildren',
+        'Route guards: isAuthenticated, isAdmin, redirectIfAuthenticated (canActivate), featureFlagGuard (canMatch), unsavedChangesGuard (canDeactivate)',
+        'Wildcard route → 404 NotFound component',
+      ],
+    },
+    {
+      id: 'state',
+      titleKey: 'home.section.state',
+      items: [
+        "NgRx SignalStore (@ngrx/signals) — providedIn: 'root' for cross-feature stores",
+        'Custom withBaseStore() feature: cache-aware load / reload / reset, with QueryState (data | loading | error | loaded)',
+        'rxMethod + tapResponse for stream-based fetchers; patchState for granular updates',
+        'Local component state via signal(); derived state via computed(); side effects via effect()',
+        'Cross-feature shared store: OrdersDataStore in core, consumed by orders feature',
+      ],
+    },
+    {
+      id: 'realtime',
+      titleKey: 'home.section.realtime',
+      items: [
+        'WebSocket RealtimeService with auto-reconnect (3 s) and signal-backed connection state',
+        'Order events streamed as a typed RxJS Subject (order:created / updated / deleted)',
+        'Web Vitals: CLS, INP, LCP, FCP, TTFB measured via dynamic import (browser-only)',
+        'Per-navigation trace IDs (TraceService) propagated as the X-Trace-Id HTTP header',
+        'Global ErrorHandler (GlobalErrorHandler) feeding a structured LoggerService',
+      ],
+    },
+    {
+      id: 'crosscutting',
+      titleKey: 'home.section.crosscutting',
+      items: [
+        'HTTP interceptors: authInterceptor (Bearer + X-Trace-Id), errorInterceptor (401 → logout)',
+        'provideHttpClient(withFetch(), withInterceptors([...])) — Fetch-based HTTP client',
+        'Fake JWT auth in localStorage (demo / admin), with exp-based isTokenExpired() check',
+        'Feature flags loaded at boot via provideAppInitializer from json-server',
+        'Backend configuration via InjectionToken (BACKEND_CONFIG) and a per-app provider',
+      ],
+    },
+    {
+      id: 'ui',
+      titleKey: 'home.section.ui',
+      items: [
+        'Custom i18n: signal-based locale (EN / DE), pure pipe ({{ key | t }}), language toggle',
+        'Theme service: light / dark / system, synced with prefers-color-scheme + localStorage',
+        'Accessibility: skip link, ARIA labels, sr-only aria-live announcer, focusable controls',
+        'Storybook 10 with @storybook/addon-a11y for UI primitives (button, card, alert)',
+        'Design tokens (colors, spacing, typography) in SCSS — single source of truth via --ds-* vars',
+      ],
+    },
+    {
+      id: 'tooling',
+      titleKey: 'home.section.tooling',
+      items: [
+        'Jest unit tests across all projects; Cypress e2e for host and login',
+        'ESLint 9 (flat config), Prettier, Husky + lint-staged on commit',
+        'Per-app GitHub Actions pipelines: ci-host.yml, ci-login.yml, ci-json-server.yml',
+        'Multi-service Docker Compose (host SSR, login remote, json-server) with dev / prod overrides',
+        'Production deploy to EC2 via SSH; image published to Docker Hub (mzahed23/angular-monorepo-template)',
+      ],
+    },
+  ],
+  de: [
+    {
+      id: 'architecture',
+      titleKey: 'home.section.architecture',
+      items: [
+        'Nx-22-Monorepo mit Apps (host, login) und Libs (core, orders, invoices, statistics, admin)',
+        'ESLint @nx/enforce-module-boundaries — Tags: type:app, type:lib, scope:shared, scope:feature',
+        'Feature-Libs dürfen nur scope:shared importieren; Libs importieren niemals aus Apps',
+        'Strikte Public APIs: jede Lib exportiert über libs/<name>/src/index.ts (keine Deep-Imports)',
+        'Module Federation (webpack): Host angular-monorepo-template lädt das login-Remote',
+      ],
+    },
+    {
+      id: 'rendering',
+      titleKey: 'home.section.rendering',
+      items: [
+        'Durchgängig Angular-21-Standalone-Components; ChangeDetectionStrategy.OnPush als Standard',
+        'Server-Side Rendering via @angular/ssr (provideServerRendering(withRoutes(...)))',
+        'Client-Hydration mit Event-Replay — provideClientHydration(withEventReplay())',
+        'Lazy-geladene Feature-Routen via loadComponent; Remote-Routen via loadChildren',
+        'Route-Guards: isAuthenticated, isAdmin, redirectIfAuthenticated (canActivate), featureFlagGuard (canMatch), unsavedChangesGuard (canDeactivate)',
+        'Wildcard-Route → 404-NotFound-Component',
+      ],
+    },
+    {
+      id: 'state',
+      titleKey: 'home.section.state',
+      items: [
+        "NgRx SignalStore (@ngrx/signals) — providedIn: 'root' für übergreifende Stores",
+        'Eigene withBaseStore()-Feature: cache-bewusstes load / reload / reset mit QueryState (data | loading | error | loaded)',
+        'rxMethod + tapResponse für stream-basierte Fetcher; patchState für gezielte Updates',
+        'Lokaler Component-State via signal(); abgeleitet via computed(); Seiteneffekte via effect()',
+        'Übergreifender Shared-Store: OrdersDataStore in core, genutzt vom orders-Feature',
+      ],
+    },
+    {
+      id: 'realtime',
+      titleKey: 'home.section.realtime',
+      items: [
+        'WebSocket-RealtimeService mit Auto-Reconnect (3 s) und signal-basiertem Verbindungsstatus',
+        'Order-Events als typisiertes RxJS-Subject (order:created / updated / deleted)',
+        'Web Vitals: CLS, INP, LCP, FCP, TTFB per Dynamic-Import gemessen (nur im Browser)',
+        'Pro Navigation generierte Trace-IDs (TraceService), als X-Trace-Id-Header weitergereicht',
+        'Globaler ErrorHandler (GlobalErrorHandler) speist strukturierten LoggerService',
+      ],
+    },
+    {
+      id: 'crosscutting',
+      titleKey: 'home.section.crosscutting',
+      items: [
+        'HTTP-Interceptors: authInterceptor (Bearer + X-Trace-Id), errorInterceptor (401 → Logout)',
+        'provideHttpClient(withFetch(), withInterceptors([...])) — Fetch-basierter HTTP-Client',
+        'Fake-JWT-Auth im localStorage (demo / admin), inkl. exp-basierter isTokenExpired()-Prüfung',
+        'Feature-Flags beim Start via provideAppInitializer aus json-server geladen',
+        'Backend-Konfiguration über InjectionToken (BACKEND_CONFIG) und app-spezifischen Provider',
+      ],
+    },
+    {
+      id: 'ui',
+      titleKey: 'home.section.ui',
+      items: [
+        'Eigenes i18n: signal-basierte Locale (EN / DE), pure Pipe ({{ key | t }}), Sprachumschalter',
+        'Theme-Service: light / dark / system, synchron mit prefers-color-scheme + localStorage',
+        'Barrierefreiheit: Skip-Link, ARIA-Labels, sr-only aria-live-Region, fokussierbare Controls',
+        'Storybook 10 mit @storybook/addon-a11y für UI-Bausteine (button, card, alert)',
+        'Design-Tokens (Farben, Spacing, Typografie) in SCSS — einzige Wahrheit über --ds-*-Variablen',
+      ],
+    },
+    {
+      id: 'tooling',
+      titleKey: 'home.section.tooling',
+      items: [
+        'Jest-Unit-Tests in allen Projekten; Cypress-E2E für host und login',
+        'ESLint 9 (Flat-Config), Prettier, Husky + lint-staged beim Commit',
+        'Pro-App-GitHub-Actions-Pipelines: ci-host.yml, ci-login.yml, ci-json-server.yml',
+        'Mehrservice-Docker-Compose (host-SSR, login-Remote, json-server) mit Dev-/Prod-Overrides',
+        'Produktiv-Deploy auf EC2 via SSH; Image auf Docker Hub (mzahed23/angular-monorepo-template)',
+      ],
+    },
+  ],
+};
 
 @Component({
   selector: 'ng-mf-nx-welcome',
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [
+    `
+      .home-intro {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: var(--color-text-muted);
+        margin: 1.5rem 0 2rem;
+        max-width: 60ch;
+      }
+      .flags-card {
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 2rem;
+      }
+      .flags-card h2 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0 0 0.25rem;
+        color: var(--color-text);
+      }
+      .flags-hint {
+        font-size: 0.8125rem;
+        color: var(--color-text-muted);
+        margin: 0 0 0.75rem;
+      }
+      .flags-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .flags-list li {
+        font-size: 0.8125rem;
+      }
+      .tech-section {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+      .tech-section h2 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin: 0 0 0.75rem;
+        color: var(--color-primary);
+        letter-spacing: -0.01em;
+      }
+      .tech-section ul {
+        margin: 0;
+        padding-left: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+      .tech-section li {
+        font-size: 0.9rem;
+        line-height: 1.5;
+        color: var(--color-text);
+      }
+      .home-footer {
+        margin-top: 2.5rem;
+        font-size: 0.8125rem;
+        color: var(--color-text-muted);
+        text-align: center;
+      }
+    `,
+  ],
   template: `
-    <!--
-     * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-     This is a starter component and can be deleted.
-     * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-     Delete this file and get started with your project!
-     * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-     -->
-
     <div class="wrapper">
       <div class="container">
-        <!--  WELCOME  -->
-        <h3>Feature Flags:</h3>
-        <ul>
-          <li>Statistics: {{ showStatistics }}</li>
-          <li>Invoices: {{ showInvoices }}</li>
-          <li>Orders: {{ showOrders }}</li>
-        </ul>
         <div id="welcome">
           <h1>
             <span> Hello there, </span>
             Welcome angular-monorepo-template 👋💃🏻🪩🎶
           </h1>
         </div>
-        <!--  HERO  -->
-        <div id="hero" class="rounded">
-          <div class="text-container">
-            <h2>
-              <svg
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
-                />
-              </svg>
-              <span>You&apos;re up and running</span>
-            </h2>
-            <a href="#commands"> What&apos;s next? </a>
-          </div>
-          <div class="logo-container">
-            <svg
-              fill="currentColor"
-              role="img"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M11.987 14.138l-3.132 4.923-5.193-8.427-.012 8.822H0V4.544h3.691l5.247 8.833.005-3.998 3.044 4.759zm.601-5.761c.024-.048 0-3.784.008-3.833h-3.65c.002.059-.005 3.776-.003 3.833h3.645zm5.634 4.134a2.061 2.061 0 0 0-1.969 1.336 1.963 1.963 0 0 1 2.343-.739c.396.161.917.422 1.33.283a2.1 2.1 0 0 0-1.704-.88zm3.39 1.061c-.375-.13-.8-.277-1.109-.681-.06-.08-.116-.17-.176-.265a2.143 2.143 0 0 0-.533-.642c-.294-.216-.68-.322-1.18-.322a2.482 2.482 0 0 0-2.294 1.536 2.325 2.325 0 0 1 4.002.388.75.75 0 0 0 .836.334c.493-.105.46.36 1.203.518v-.133c-.003-.446-.246-.55-.75-.733zm2.024 1.266a.723.723 0 0 0 .347-.638c-.01-2.957-2.41-5.487-5.37-5.487a5.364 5.364 0 0 0-4.487 2.418c-.01-.026-1.522-2.39-1.538-2.418H8.943l3.463 5.423-3.379 5.32h3.54l1.54-2.366 1.568 2.366h3.541l-3.21-5.052a.7.7 0 0 1-.084-.32 2.69 2.69 0 0 1 2.69-2.691h.001c1.488 0 1.736.89 2.057 1.308.634.826 1.9.464 1.9 1.541a.707.707 0 0 0 1.066.596zm.35.133c-.173.372-.56.338-.755.639-.176.271.114.412.114.412s.337.156.538-.311c.104-.231.14-.488.103-.74z"
-              />
-            </svg>
-          </div>
-        </div>
-        <!--  MIDDLE CONTENT  -->
-        <div id="middle-content">
-          <div id="middle-left-content">
-            <div id="learning-materials" class="rounded shadow">
-              <h2>Learning materials</h2>
-              <a
-                href="https://nx.dev/getting-started/intro?utm_source=nx-project"
-                target="_blank"
-                rel="noreferrer"
-                class="list-item-link"
-              >
-                <svg
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                  />
-                </svg>
-                <span>
-                  Documentation
-                  <span> Everything is in there </span>
-                </span>
-                <svg
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </a>
-              <a
-                href="https://nx.dev/blog?utm_source=nx-project"
-                target="_blank"
-                rel="noreferrer"
-                class="list-item-link"
-              >
-                <svg
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"
-                  />
-                </svg>
-                <span>
-                  Blog
-                  <span> Changelog, features & events </span>
-                </span>
-                <svg
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </a>
-              <a
-                href="https://www.youtube.com/@NxDevtools/videos?utm_source=nx-project&sub_confirmation=1"
-                target="_blank"
-                rel="noreferrer"
-                class="list-item-link"
-              >
-                <svg
-                  role="img"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <title>YouTube</title>
-                  <path
-                    d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
-                  />
-                </svg>
-                <span>
-                  YouTube channel
-                  <span> Nx Show, talks & tutorials </span>
-                </span>
-                <svg
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </a>
-              <a
-                href="https://nx.dev/getting-started/tutorials/angular-standalone-tutorial?utm_source=nx-project"
-                target="_blank"
-                rel="noreferrer"
-                class="list-item-link"
-              >
-                <svg
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
-                  />
-                </svg>
-                <span>
-                  Interactive tutorials
-                  <span> Create an app, step-by-step </span>
-                </span>
-                <svg
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </a>
-            </div>
-            <a
-              id="nx-repo"
-              class="button-pill rounded shadow"
-              href="https://github.com/nrwl/nx?utm_source=nx-project"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <svg
-                fill="currentColor"
-                role="img"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
-                />
-              </svg>
-              <span>
-                Nx is open source
-                <span> Love Nx? Give us a star! </span>
-              </span>
-            </a>
-          </div>
-          <div id="other-links">
-            <a
-              class="button-pill rounded shadow nx-console"
-              href="https://marketplace.visualstudio.com/items?itemName=nrwl.angular-console&utm_source=nx-project"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <svg
-                fill="currentColor"
-                role="img"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <title>Visual Studio Code</title>
-                <path
-                  d="M23.15 2.587L18.21.21a1.494 1.494 0 0 0-1.705.29l-9.46 8.63-4.12-3.128a.999.999 0 0 0-1.276.057L.327 7.261A1 1 0 0 0 .326 8.74L3.899 12 .326 15.26a1 1 0 0 0 .001 1.479L1.65 17.94a.999.999 0 0 0 1.276.057l4.12-3.128 9.46 8.63a1.492 1.492 0 0 0 1.704.29l4.942-2.377A1.5 1.5 0 0 0 24 20.06V3.939a1.5 1.5 0 0 0-.85-1.352zm-5.146 14.861L10.826 12l7.178-5.448v10.896z"
-                />
-              </svg>
-              <span>
-                Install Nx Console for VSCode
-                <span>The official VSCode extension for Nx.</span>
-              </span>
-            </a>
-            <a
-              class="button-pill rounded shadow nx-console-jetbrains"
-              href="https://plugins.jetbrains.com/plugin/21060-nx-console"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <svg
-                height="48"
-                width="48"
-                viewBox="20 20 60 60"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="m22.5 22.5h60v60h-60z" />
-                <g fill="#fff">
-                  <path d="m29.03 71.25h22.5v3.75h-22.5z" />
-                  <path
-                    d="m28.09 38 1.67-1.58a1.88 1.88 0 0 0 1.47.87c.64 0 1.06-.44 1.06-1.31v-5.98h2.58v6a3.48 3.48 0 0 1 -.87 2.6 3.56 3.56 0 0 1 -2.57.95 3.84 3.84 0 0 1 -3.34-1.55z"
-                  />
-                  <path
-                    d="m36 30h7.53v2.19h-5v1.44h4.49v2h-4.42v1.49h5v2.21h-7.6z"
-                  />
-                  <path d="m47.23 32.29h-2.8v-2.29h8.21v2.27h-2.81v7.1h-2.6z" />
-                  <path
-                    d="m29.13 43.08h4.42a3.53 3.53 0 0 1 2.55.83 2.09 2.09 0 0 1 .6 1.53 2.16 2.16 0 0 1 -1.44 2.09 2.27 2.27 0 0 1 1.86 2.29c0 1.61-1.31 2.59-3.55 2.59h-4.44zm5 2.89c0-.52-.42-.8-1.18-.8h-1.29v1.64h1.24c.79 0 1.25-.26 1.25-.81zm-.9 2.66h-1.57v1.73h1.62c.8 0 1.24-.31 1.24-.86 0-.5-.4-.87-1.27-.87z"
-                  />
-                  <path
-                    d="m38 43.08h4.1a4.19 4.19 0 0 1 3 1 2.93 2.93 0 0 1 .9 2.19 3 3 0 0 1 -1.93 2.89l2.24 3.27h-3l-1.88-2.84h-.87v2.84h-2.56zm4 4.5c.87 0 1.39-.43 1.39-1.11 0-.75-.54-1.12-1.4-1.12h-1.44v2.26z"
-                  />
-                  <path
-                    d="m49.59 43h2.5l4 9.44h-2.79l-.67-1.69h-3.63l-.67 1.69h-2.71zm2.27 5.73-1-2.65-1.06 2.65z"
-                  />
-                  <path d="m56.46 43.05h2.6v9.37h-2.6z" />
-                  <path
-                    d="m60.06 43.05h2.42l3.37 5v-5h2.57v9.37h-2.26l-3.53-5.14v5.14h-2.57z"
-                  />
-                  <path
-                    d="m68.86 51 1.45-1.73a4.84 4.84 0 0 0 3 1.13c.71 0 1.08-.24 1.08-.65 0-.4-.31-.6-1.59-.91-2-.46-3.53-1-3.53-2.93 0-1.74 1.37-3 3.62-3a5.89 5.89 0 0 1 3.86 1.25l-1.26 1.84a4.63 4.63 0 0 0 -2.62-.92c-.63 0-.94.25-.94.6 0 .42.32.61 1.63.91 2.14.46 3.44 1.16 3.44 2.91 0 1.91-1.51 3-3.79 3a6.58 6.58 0 0 1 -4.35-1.5z"
-                  />
-                </g>
-              </svg>
-              <span>
-                Install Nx Console for JetBrains
-                <span
-                  >Available for WebStorm, Intellij IDEA Ultimate and
-                  more!</span
-                >
-              </span>
-            </a>
-            <div id="nx-cloud" class="rounded shadow">
-              <div>
-                <svg
-                  id="nx-cloud-logo"
-                  role="img"
-                  xmlns="http://www.w3.org/2000/svg"
-                  stroke="currentColor"
-                  fill="transparent"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-width="2"
-                    d="M23 3.75V6.5c-3.036 0-5.5 2.464-5.5 5.5s-2.464 5.5-5.5 5.5-5.5 2.464-5.5 5.5H3.75C2.232 23 1 21.768 1 20.25V3.75C1 2.232 2.232 1 3.75 1h16.5C21.768 1 23 2.232 23 3.75Z"
-                  />
-                  <path
-                    stroke-width="2"
-                    d="M23 6v14.1667C23 21.7307 21.7307 23 20.1667 23H6c0-3.128 2.53867-5.6667 5.6667-5.6667 3.128 0 5.6666-2.5386 5.6666-5.6666C17.3333 8.53867 19.872 6 23 6Z"
-                  />
-                </svg>
-                <h2>
-                  Nx Cloud
-                  <span> Enable faster CI & better DX </span>
-                </h2>
-              </div>
-              <p>Your Nx Cloud remote cache setup is almost complete.</p>
 
-              <a
-                href="https://cloud.nx.app/connect/MGJQIV2d0X"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Click here to finish
-              </a>
-            </div>
-          </div>
-        </div>
-        <!--  COMMANDS  -->
-        <div id="commands" class="rounded shadow">
-          <h2>Next steps</h2>
-          <p>Here are some things you can do with Nx:</p>
-          <details>
-            <summary>
-              <svg
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-              Build, test and lint your app
-            </summary>
-            <pre><span># Build</span>
-nx build 
-<span># Test</span>
-nx test 
-<span># Lint</span>
-nx lint 
-<span># Run them together!</span>
-nx run-many -t build test lint</pre>
-          </details>
-          <details>
-            <summary>
-              <svg
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-              View project details
-            </summary>
-            <pre>nx show project angular-monorepo-template</pre>
-          </details>
+        <p class="home-intro">{{ 'home.intro' | t }}</p>
 
-          <details>
-            <summary>
-              <svg
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
+        <section
+          class="card flags-card rounded shadow"
+          aria-labelledby="flags-title"
+        >
+          <h2 id="flags-title">{{ 'home.flags.title' | t }}</h2>
+          <p class="flags-hint">{{ 'home.flags.hint' | t }}</p>
+          <ul class="flags-list">
+            <li>
+              <span
+                class="badge"
+                [class.badge--success]="showStatistics"
+                [class.badge--neutral]="!showStatistics"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-              View interactive project graph
-            </summary>
-            <pre>nx graph</pre>
-          </details>
+                {{ 'home.flag.statistics' | t }} ·
+                {{ (showStatistics ? 'home.flag.on' : 'home.flag.off') | t }}
+              </span>
+            </li>
+            <li>
+              <span
+                class="badge"
+                [class.badge--success]="showInvoices"
+                [class.badge--neutral]="!showInvoices"
+              >
+                {{ 'home.flag.invoices' | t }} ·
+                {{ (showInvoices ? 'home.flag.on' : 'home.flag.off') | t }}
+              </span>
+            </li>
+            <li>
+              <span
+                class="badge"
+                [class.badge--success]="showOrders"
+                [class.badge--neutral]="!showOrders"
+              >
+                {{ 'home.flag.orders' | t }} ·
+                {{ (showOrders ? 'home.flag.on' : 'home.flag.off') | t }}
+              </span>
+            </li>
+          </ul>
+        </section>
 
-          <details>
-            <summary>
-              <svg
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-              Add UI library
-            </summary>
-            <pre><span># Generate UI lib</span>
-nx g &#64;nx/angular:lib ui
-<span># Add a component</span>
-nx g &#64;nx/angular:component ui/src/lib/button</pre>
-          </details>
-        </div>
-        <p id="love">
-          Carefully crafted with
-          <svg
-            fill="currentColor"
-            stroke="none"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
+        @for (section of sections(); track section.id) {
+          <section
+            class="card tech-section rounded shadow"
+            [attr.aria-labelledby]="'sec-' + section.id"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-            />
-          </svg>
-        </p>
+            <h2 [id]="'sec-' + section.id">{{ section.titleKey | t }}</h2>
+            <ul>
+              @for (item of section.items; track item) {
+                <li>{{ item }}</li>
+              }
+            </ul>
+          </section>
+        }
+
+        <p class="home-footer">{{ 'home.footer' | t }}</p>
       </div>
     </div>
   `,
-  styles: [],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NxWelcome {
   private featureFlagService = inject(FeatureFlagService);
+  private i18n = inject(I18nService);
 
-  showStatistics = this.featureFlagService.isEnabled('statistics');
-  showInvoices = this.featureFlagService.isEnabled('invoices');
-  showOrders = this.featureFlagService.isEnabled('orders');
+  readonly showStatistics = this.featureFlagService.isEnabled('statistics');
+  readonly showInvoices = this.featureFlagService.isEnabled('invoices');
+  readonly showOrders = this.featureFlagService.isEnabled('orders');
+
+  readonly sections = computed(() => SECTIONS[this.i18n.locale()]);
 }

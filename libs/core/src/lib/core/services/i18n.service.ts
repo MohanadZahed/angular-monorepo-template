@@ -50,6 +50,26 @@ const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     'invoices.status': 'Status',
     'invoices.next': 'Next ›',
     'invoices.previous': '‹ Previous',
+
+    'home.intro':
+      'A reference build documenting every architectural technique implemented in this workspace. Each section maps to real code in the repo — use it as an interview cheat-sheet.',
+    'home.flags.title': 'Runtime feature flags',
+    'home.flags.hint':
+      'Loaded from json-server at app boot via provideAppInitializer; gated at the route layer with canMatch.',
+    'home.flag.statistics': 'Statistics',
+    'home.flag.invoices': 'Invoices',
+    'home.flag.orders': 'Orders',
+    'home.flag.on': 'enabled',
+    'home.flag.off': 'disabled',
+    'home.section.architecture': 'Architecture & Monorepo',
+    'home.section.rendering': 'Rendering & Routing',
+    'home.section.state': 'State Management',
+    'home.section.realtime': 'Realtime & Observability',
+    'home.section.crosscutting': 'Cross-Cutting Concerns',
+    'home.section.ui': 'UI, Accessibility & i18n',
+    'home.section.tooling': 'Tooling, CI & Delivery',
+    'home.footer':
+      'Crafted as a reference / interview prep workspace — every bullet here is wired up in code.',
   },
   de: {
     'nav.statistics': 'Statistik',
@@ -87,6 +107,26 @@ const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     'invoices.status': 'Status',
     'invoices.next': 'Weiter ›',
     'invoices.previous': '‹ Zurück',
+
+    'home.intro':
+      'Ein Referenzprojekt, das jede in diesem Workspace umgesetzte Architektur-Technik dokumentiert. Jeder Abschnitt verweist auf echten Code im Repository — nutze die Seite als Spickzettel fürs Interview.',
+    'home.flags.title': 'Feature-Flags zur Laufzeit',
+    'home.flags.hint':
+      'Beim App-Start über provideAppInitializer aus json-server geladen; auf Route-Ebene per canMatch gefiltert.',
+    'home.flag.statistics': 'Statistik',
+    'home.flag.invoices': 'Rechnungen',
+    'home.flag.orders': 'Bestellungen',
+    'home.flag.on': 'aktiv',
+    'home.flag.off': 'inaktiv',
+    'home.section.architecture': 'Architektur & Monorepo',
+    'home.section.rendering': 'Rendering & Routing',
+    'home.section.state': 'State-Management',
+    'home.section.realtime': 'Echtzeit & Observability',
+    'home.section.crosscutting': 'Querschnittsthemen',
+    'home.section.ui': 'UI, Barrierefreiheit & i18n',
+    'home.section.tooling': 'Tooling, CI & Auslieferung',
+    'home.footer':
+      'Als Referenz- und Interview-Vorbereitungs-Workspace gebaut — jeder Punkt hier ist im Code tatsächlich verdrahtet.',
   },
 };
 

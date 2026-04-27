@@ -1,82 +1,138 @@
-# AngularMonorepoTemplate
+# Angular Monorepo Template
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+A reference Nx 22 + Angular 21 workspace built as an interview-prep cheat-sheet. Every section below is wired up in real code — open the matching files to see how it works. The same overview is rendered on the app's home page in English and German.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+## Stack at a glance
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/tutorials/angular-standalone-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+- **Framework**: Angular 21 (standalone components, signals, OnPush)
+- **Monorepo**: Nx 22 with Module Federation (webpack)
+- **SSR**: `@angular/ssr` on the host app, hydrated with event replay
+- **State**: NgRx SignalStore (`@ngrx/signals`) + custom `withBaseStore` feature
+- **Realtime**: WebSocket service with auto-reconnect
+- **Tooling**: Jest, Cypress, Storybook 10, ESLint 9, Prettier, Husky, lint-staged
+- **Delivery**: Docker Compose (host SSR + login remote + json-server) → Docker Hub → EC2
 
-## Finish your CI setup
+## Implemented techniques
 
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/NdzIjPOMjM)
+### 1. Architecture & Monorepo
 
+- Apps: `angular-monorepo-template` (host, SSR), `login` (remote), plus `*-e2e` Cypress projects.
+- Libs: `core`, `orders`, `invoices`, `statistics`, `admin`.
+- Module boundaries enforced by ESLint (`@nx/enforce-module-boundaries`) using tags `type:app | type:lib` + `scope:shared | scope:feature`. Feature libs can only depend on `scope:shared`; libs never import from apps.
+- Public API only: each lib exports through `libs/<name>/src/index.ts` — no deep imports.
+- **Module Federation (webpack)** — host consumes the `login` remote at runtime (`apps/*/module-federation.config.ts`).
 
-## Run tasks
+### 2. Rendering & Routing
 
-To run the dev server for your app, use:
+- Standalone components everywhere; `ChangeDetectionStrategy.OnPush` is the default.
+- **SSR** via `provideServerRendering(withRoutes(...))` (`apps/angular-monorepo-template/src/app/app.config.server.ts`).
+- **Hydration** with event replay: `provideClientHydration(withEventReplay())`.
+- **Lazy loading** — feature pages via `loadComponent`, the login remote via `loadChildren: () => import('login/Routes')`.
+- **Route guards**: `isAuthenticated`, `isAdmin`, `redirectIfAuthenticated` (`canActivate`), `featureFlagGuard` (`canMatch`), `unsavedChangesGuard` (`canDeactivate`).
+- Wildcard route falls back to a 404 `NotFound` component.
+
+### 3. State Management
+
+- **NgRx SignalStore** (`@ngrx/signals`) with `providedIn: 'root'` for cross-feature stores.
+- Custom `withBaseStore()` SignalStore feature (`libs/core/.../store/with-base-store.ts`) provides cache-aware `load` / `reload` / `reset` plus a derived `queryState` (`data | loading | error | loaded`).
+- `rxMethod` + `tapResponse` for stream-based fetchers; `patchState` for granular updates.
+- Local state via `signal()`, derived state via `computed()`, side effects via `effect()`.
+- Cross-feature shared store: `OrdersDataStore` lives in core and is consumed by the orders feature.
+
+### 4. Realtime & Observability
+
+- **WebSocket** `RealtimeService` with auto-reconnect (3 s) and signal-backed `connected` state. Streams typed `order:created | order:updated | order:deleted` events through an RxJS `Subject`.
+- **Web Vitals** — `CLS / INP / LCP / FCP / TTFB` measured via dynamic `import('web-vitals')` (browser-only), reported through the `LoggerService`.
+- **Trace IDs** — `TraceService` regenerates a per-navigation ID and the `authInterceptor` propagates it as `X-Trace-Id`.
+- Global `ErrorHandler` (`GlobalErrorHandler`) feeds a structured `LoggerService`.
+
+### 5. Cross-Cutting Concerns
+
+- HTTP interceptors: `authInterceptor` (Bearer token + trace header), `errorInterceptor` (401 → logout + redirect).
+- `provideHttpClient(withFetch(), withInterceptors([...]))` — Fetch-based HTTP client.
+- Fake JWT auth in `localStorage` (`demo` / `admin`) with `exp`-based `isTokenExpired()` check.
+- Feature flags fetched at boot via `provideAppInitializer` from `json-server`; gated at the route layer with `canMatch`.
+- Backend configuration via `InjectionToken` (`BACKEND_CONFIG`) with a per-app provider.
+
+### 6. UI, Accessibility & i18n
+
+- **Custom i18n** — signal-based locale (`en` / `de`), pure pipe `{{ key | t }}`, language toggle component, `documentElement.lang` synced via `effect()`.
+- **Theme service** — `light | dark | system`, synchronised with `prefers-color-scheme` and `localStorage`.
+- **Accessibility** — skip link, ARIA labels, `sr-only` `aria-live` announcer for auth state changes, focusable controls, AXE/WCAG-AA targeted.
+- **Storybook 10** + `@storybook/addon-a11y` for UI primitives (`button`, `card`, `alert`).
+- **Design tokens** (colors, spacing, typography) in SCSS — single source of truth via `--ds-*` CSS variables.
+
+### 7. Tooling, CI & Delivery
+
+- **Tests**: Jest unit tests (`nx run-many -t test`) and Cypress e2e for both host and login.
+- **Lint / format**: ESLint 9 (flat config) with Nx boundaries, Prettier, Husky + lint-staged on commit.
+- **CI**: per-app GitHub Actions pipelines — `.github/workflows/ci-host.yml`, `ci-login.yml`, `ci-json-server.yml`.
+- **Docker**: multi-service Compose (`docker-compose.yml` + `*.override.yml` + `*.prod.yml`) for host SSR (port 4000), login remote (port 80) and json-server (port 3000).
+- **Deploy**: Image published to Docker Hub (`mzahed23/angular-monorepo-template`) then pulled on EC2 via SSH.
+
+## Project layout
+
+### Apps
+
+| App                             | Type        | Port              | Notes                                      |
+| ------------------------------- | ----------- | ----------------- | ------------------------------------------ |
+| `angular-monorepo-template`     | Host (MF)   | 4200 / 4000 (SSR) | SSR enabled, serves port 4000 in container |
+| `angular-monorepo-template-e2e` | Cypress e2e | —                 | E2E for host app                           |
+| `login`                         | Remote (MF) | 4201              | Client-side only                           |
+| `login-e2e`                     | Cypress e2e | —                 | E2E for login app                          |
+
+### Libs
+
+| Lib          | Purpose                                                        |
+| ------------ | -------------------------------------------------------------- |
+| `core`       | Shared services, guards, interceptors, stores, UI, i18n, theme |
+| `orders`     | Orders feature (uses `OrdersDataStore` from core)              |
+| `statistics` | Statistics feature                                             |
+| `invoices`   | Invoices feature                                               |
+| `admin`      | Admin feature-flags page (gated by `isAdmin`)                  |
+
+### Runtime services
+
+- **json-server** (`/json-server/`) — feature flags fetched at app init; config in `json-server/config.json`.
+- All three services orchestrated via `docker-compose.yml`.
+
+## Run it
 
 ```sh
-npx nx serve angular-monorepo-template
+# Host dev server (no Docker)
+npm exec nx serve angular-monorepo-template       # http://localhost:4200
+
+# Login remote (no Docker)
+npm exec nx serve login                           # http://localhost:4201
+
+# Everything (host + login + json-server) via Docker
+docker compose up
+
+# Tests
+npm exec nx run-many -t test                      # unit
+npm exec nx e2e angular-monorepo-template-e2e     # e2e (host)
+npm exec nx e2e login-e2e                         # e2e (login)
+
+# Storybook for UI primitives
+npm exec nx run core:storybook
 ```
 
-To create a production bundle:
+## Demo credentials
+
+| User    | Password | Notes                          |
+| ------- | -------- | ------------------------------ |
+| `demo`  | `demo`   | Standard user                  |
+| `admin` | `admin`  | Unlocks `/admin/feature-flags` |
+
+## EC2 production
+
+- URL: <http://13.50.4.156/>
+- Port mapping: host `8080 → 4000`, login `8082 → 80`, json-server `3000 → 3000`.
+
+## Useful Nx commands
 
 ```sh
-npx nx build angular-monorepo-template
+npm exec nx graph                                 # interactive dependency graph
+npm exec nx show project angular-monorepo-template
+npm exec nx affected -t lint test                 # only what changed
 ```
-
-To see all available targets to run for a project, run:
-
-```sh
-npx nx show project angular-monorepo-template
-```
-
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
-
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Add new projects
-
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
-
-Use the plugin's generator to create new projects.
-
-To generate a new application, use:
-
-```sh
-npx nx g @nx/angular:app demo
-```
-
-To generate a new library, use:
-
-```sh
-npx nx g @nx/angular:lib mylib
-```
-
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
-
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/getting-started/tutorials/angular-standalone-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
