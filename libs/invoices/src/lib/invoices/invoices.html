@@ -1,7 +1,7 @@
 <div class="page">
   <div class="page-header">
-    <h1 class="page-title">Invoices</h1>
-    <p class="page-subtitle">Track and manage client invoices</p>
+    <h1 class="page-title">{{ 'invoices.title' | t }}</h1>
+    <p class="page-subtitle">{{ 'invoices.subtitle' | t }}</p>
   </div>
 
   @if (error()) {
@@ -10,7 +10,9 @@
 
   <div class="card">
     <div class="invoice-toolbar">
-      <label class="form-label" for="statusFilter">Status</label>
+      <label class="form-label" for="statusFilter"
+        >{{ 'invoices.status' | t }}</label
+      >
       <select
         id="statusFilter"
         class="form-input form-input--short"
@@ -27,7 +29,9 @@
     </div>
 
     @if (loading() && pageRows().length === 0) {
-    <p class="muted" role="status" aria-live="polite">Loading invoices…</p>
+    <p class="muted" role="status" aria-live="polite">
+      {{ 'invoices.loading' | t }}
+    </p>
     } @else {
     <table class="data-table" aria-label="Client invoices">
       <thead>
@@ -82,9 +86,7 @@
         </tr>
         } @if (pageRows().length === 0 && !loading()) {
         <tr>
-          <td colspan="6" class="muted">
-            No invoices match the current filter.
-          </td>
+          <td colspan="6" class="muted">{{ 'invoices.empty' | t }}</td>
         </tr>
         }
       </tbody>
@@ -98,7 +100,7 @@
         (click)="prevPage()"
         [disabled]="page() === 1"
       >
-        ‹ Previous
+        {{ 'invoices.previous' | t }}
       </button>
       <span class="muted">Page {{ page() }} of {{ totalPages() }}</span>
       <button
@@ -107,7 +109,7 @@
         (click)="nextPage()"
         [disabled]="page() === totalPages()"
       >
-        Next ›
+        {{ 'invoices.next' | t }}
       </button>
     </nav>
   </div>

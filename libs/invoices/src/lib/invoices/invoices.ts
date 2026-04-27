@@ -6,7 +6,10 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { UiAlertComponent } from '@angular-monorepo-template/core';
+import {
+  TranslatePipe,
+  UiAlertComponent,
+} from '@angular-monorepo-template/core';
 import { Invoice, InvoiceStatus } from './invoices.service';
 import { InvoicesStore } from './invoices.store';
 
@@ -41,7 +44,7 @@ interface InvoiceRow extends Invoice {
 
 @Component({
   selector: 'lib-invoices',
-  imports: [UiAlertComponent],
+  imports: [UiAlertComponent, TranslatePipe],
   templateUrl: './invoices.html',
   styleUrl: './invoices.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

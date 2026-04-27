@@ -1,7 +1,7 @@
 <div class="login-page">
   <div class="login-card">
-    <h1 class="login-title">Sign in</h1>
-    <p class="login-subtitle">Enter your credentials to continue</p>
+    <h1 class="login-title">{{ 'login.title' | t }}</h1>
+    <p class="login-subtitle">{{ 'login.subtitle' | t }}</p>
     <form
       [formGroup]="loginForm"
       (ngSubmit)="login()"
@@ -9,7 +9,9 @@
       class="login-form"
     >
       <div class="form-group">
-        <label for="username" class="form-label">Username</label>
+        <label for="username" class="form-label"
+          >{{ 'login.username' | t }}</label
+        >
         <input
           id="username"
           type="text"
@@ -28,7 +30,9 @@
         </span>
       </div>
       <div class="form-group">
-        <label for="password" class="form-label">Password</label>
+        <label for="password" class="form-label"
+          >{{ 'login.password' | t }}</label
+        >
         <input
           id="password"
           type="password"
@@ -48,10 +52,12 @@
       </div>
       @if (loginFailed()) {
       <p class="form-error form-error--summary" role="alert">
-        Invalid username or password.
+        {{ 'login.invalidCredentials' | t }}
       </p>
       }
-      <button class="btn btn--primary login-btn" type="submit">Sign in</button>
+      <button class="btn btn--primary login-btn" type="submit">
+        {{ 'login.submit' | t }}
+      </button>
     </form>
   </div>
 </div>

@@ -6,10 +6,13 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { UserAuthService } from '@angular-monorepo-template/core';
+import {
+  TranslatePipe,
+  UserAuthService,
+} from '@angular-monorepo-template/core';
 
 @Component({
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, TranslatePipe],
   selector: 'ng-mf-login-entry',
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './entry.html',

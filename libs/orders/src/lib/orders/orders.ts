@@ -9,6 +9,7 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   HasUnsavedChanges,
+  TranslatePipe,
   UiButtonComponent,
   UiAlertComponent,
 } from '@angular-monorepo-template/core';
@@ -23,7 +24,12 @@ const PRODUCTS = [
 
 @Component({
   selector: 'lib-orders',
-  imports: [ReactiveFormsModule, UiButtonComponent, UiAlertComponent],
+  imports: [
+    ReactiveFormsModule,
+    UiButtonComponent,
+    UiAlertComponent,
+    TranslatePipe,
+  ],
   templateUrl: './orders.html',
   styleUrl: './orders.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

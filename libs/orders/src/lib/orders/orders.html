@@ -3,11 +3,11 @@
   <div class="page-header">
     <div class="page-header-row">
       <div>
-        <h1 class="page-title">Orders</h1>
-        <p class="page-subtitle">Manage and track customer orders</p>
+        <h1 class="page-title">{{ 'orders.title' | t }}</h1>
+        <p class="page-subtitle">{{ 'orders.subtitle' | t }}</p>
       </div>
       <ui-button variant="primary" type="button" (click)="startNewOrder()">
-        + New Order
+        {{ 'orders.new' | t }}
       </ui-button>
     </div>
   </div>
@@ -16,17 +16,19 @@
     @if (loadError()) {
     <ui-alert type="error">{{ loadError() }}</ui-alert>
     } @if (loading() && orders().length === 0) {
-    <p class="muted" role="status" aria-live="polite">Loading orders…</p>
+    <p class="muted" role="status" aria-live="polite">
+      {{ 'orders.loading' | t }}
+    </p>
     } @else {
     <table class="data-table" aria-label="Customer orders">
       <thead>
         <tr>
-          <th scope="col">Order ID</th>
-          <th scope="col">Customer</th>
-          <th scope="col">Items</th>
-          <th scope="col">Amount</th>
-          <th scope="col">Status</th>
-          <th scope="col">Date</th>
+          <th scope="col">{{ 'orders.col.id' | t }}</th>
+          <th scope="col">{{ 'orders.col.customer' | t }}</th>
+          <th scope="col">{{ 'orders.col.items' | t }}</th>
+          <th scope="col">{{ 'orders.col.amount' | t }}</th>
+          <th scope="col">{{ 'orders.col.status' | t }}</th>
+          <th scope="col">{{ 'orders.col.date' | t }}</th>
         </tr>
       </thead>
       <tbody>
@@ -45,7 +47,7 @@
         </tr>
         } @if (!loading() && orders().length === 0) {
         <tr>
-          <td colspan="6" class="muted">No orders yet.</td>
+          <td colspan="6" class="muted">{{ 'orders.empty' | t }}</td>
         </tr>
         }
       </tbody>
