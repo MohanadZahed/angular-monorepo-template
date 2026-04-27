@@ -4,6 +4,7 @@ export interface BackendConfig {
     featureFlagsUrl: string;
     ordersUrl: string;
     invoicesUrl: string;
+    wsUrl?: string;
     prefix?: string;
     /**
      * Indicates whether or not cross-site Access-Control requests should be made

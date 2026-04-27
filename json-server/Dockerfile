@@ -2,8 +2,11 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-RUN npm install -g json-server
+COPY package.json ./
+RUN npm install --omit=dev
+
+COPY server.js ./
 
 EXPOSE 3000
 
-CMD ["json-server", "--watch", "config.json", "--port", "3000", "--host", "0.0.0.0"]
+CMD ["node", "server.js"]

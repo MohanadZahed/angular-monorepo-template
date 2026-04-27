@@ -3,4 +3,5 @@ export const environment = {
   featureFlagsUrl: 'http://0.0.0.0:3000/featureFlags',
   ordersUrl: 'http://0.0.0.0:3000/orders',
   invoicesUrl: 'http://0.0.0.0:3000/invoices',
+  wsUrl: 'ws://0.0.0.0:3000/ws',
 };
