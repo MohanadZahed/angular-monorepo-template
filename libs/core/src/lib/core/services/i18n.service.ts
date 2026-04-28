@@ -52,7 +52,7 @@ const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     'invoices.previous': '‹ Previous',
 
     'home.intro':
-      'A reference build documenting every architectural technique implemented in this workspace. Each section maps to real code in the repo — use it as an interview cheat-sheet.',
+      'A reference build documenting every architectural technique implemented in this workspace. Each section maps to real code in the repo.',
     'home.flags.title': 'Runtime feature flags',
     'home.flags.hint':
       'Loaded from json-server at app boot via provideAppInitializer; gated at the route layer with canMatch.',
@@ -69,7 +69,7 @@ const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     'home.section.ui': 'UI, Accessibility & i18n',
     'home.section.tooling': 'Tooling, CI & Delivery',
     'home.footer':
-      'Crafted as a reference / interview prep workspace — every bullet here is wired up in code.',
+      'Crafted as a reference workspace — every bullet here is wired up in code.',
   },
   de: {
     'nav.statistics': 'Statistik',
@@ -109,7 +109,7 @@ const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     'invoices.previous': '‹ Zurück',
 
     'home.intro':
-      'Ein Referenzprojekt, das jede in diesem Workspace umgesetzte Architektur-Technik dokumentiert. Jeder Abschnitt verweist auf echten Code im Repository — nutze die Seite als Spickzettel fürs Interview.',
+      'Ein Referenzprojekt, das jede in diesem Workspace umgesetzte Architektur-Technik dokumentiert. Jeder Abschnitt verweist auf echten Code im Repository.',
     'home.flags.title': 'Feature-Flags zur Laufzeit',
     'home.flags.hint':
       'Beim App-Start über provideAppInitializer aus json-server geladen; auf Route-Ebene per canMatch gefiltert.',
@@ -126,7 +126,7 @@ const TRANSLATIONS: Record<Locale, Record<string, string>> = {
     'home.section.ui': 'UI, Barrierefreiheit & i18n',
     'home.section.tooling': 'Tooling, CI & Auslieferung',
     'home.footer':
-      'Als Referenz- und Interview-Vorbereitungs-Workspace gebaut — jeder Punkt hier ist im Code tatsächlich verdrahtet.',
+      'Als Referenz-Workspace gebaut — jeder Punkt hier ist im Code tatsächlich verdrahtet.',
   },
 };
 

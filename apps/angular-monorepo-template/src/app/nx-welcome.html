@@ -1,0 +1,68 @@
+<div class="wrapper">
+  <div class="container">
+    <div id="welcome">
+      <h1>
+        <span> Hello there, </span>
+        Welcome angular-monorepo-template 👋💃🏻🪩🎶
+      </h1>
+    </div>
+
+    <p class="home-intro">{{ 'home.intro' | t }}</p>
+
+    <section
+      class="card flags-card rounded shadow"
+      aria-labelledby="flags-title"
+    >
+      <h2 id="flags-title">{{ 'home.flags.title' | t }}</h2>
+      <p class="flags-hint">{{ 'home.flags.hint' | t }}</p>
+      <ul class="flags-list">
+        <li>
+          <span
+            class="badge"
+            [class.badge--success]="showStatistics"
+            [class.badge--neutral]="!showStatistics"
+          >
+            {{ 'home.flag.statistics' | t }} · {{ (showStatistics ?
+            'home.flag.on' : 'home.flag.off') | t }}
+          </span>
+        </li>
+        <li>
+          <span
+            class="badge"
+            [class.badge--success]="showInvoices"
+            [class.badge--neutral]="!showInvoices"
+          >
+            {{ 'home.flag.invoices' | t }} · {{ (showInvoices ? 'home.flag.on' :
+            'home.flag.off') | t }}
+          </span>
+        </li>
+        <li>
+          <span
+            class="badge"
+            [class.badge--success]="showOrders"
+            [class.badge--neutral]="!showOrders"
+          >
+            {{ 'home.flag.orders' | t }} · {{ (showOrders ? 'home.flag.on' :
+            'home.flag.off') | t }}
+          </span>
+        </li>
+      </ul>
+    </section>
+
+    @for (section of sections(); track section.id) {
+    <section
+      class="card tech-section rounded shadow"
+      [attr.aria-labelledby]="'sec-' + section.id"
+    >
+      <h2 [id]="'sec-' + section.id">{{ section.titleKey | t }}</h2>
+      <ul>
+        @for (item of section.items; track item) {
+        <li>{{ item }}</li>
+        }
+      </ul>
+    </section>
+    }
+
+    <p class="home-footer">{{ 'home.footer' | t }}</p>
+  </div>
+</div>
