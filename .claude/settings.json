@@ -56,7 +56,8 @@
       "Bash(npm exec -- nx * | tail *)",
       "Bash(npm exec -- nx * | grep *)",
       "Bash(npm exec -- nx * 2>&1 | tail *)",
-      "Bash(npm exec -- nx * 2>&1 | grep *)"
+      "Bash(npm exec -- nx * 2>&1 | grep *)",
+      "Bash(npx eslint *)"
     ]
   }
 }
